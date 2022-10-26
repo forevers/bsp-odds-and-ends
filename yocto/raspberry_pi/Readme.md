@@ -16,7 +16,8 @@
 - systemd
 - vim
 - tzdata
-
+- ess-canonical-app - generic user space application
+- python3
 
 ## yocto layers
 
@@ -101,7 +102,7 @@
     OVERLAYFS_ETC_DEVICE ?= "/dev/mmcblk0p3"
     ```
 
-- create new distro sources/meta-ess/conf/distro/*ess-distro.conf*
+- create new distro sources/meta-ess/conf/distro/**ess-distro.conf**
 
     - distro configure the service manager as systemd vs default sysv
 
@@ -125,13 +126,11 @@
 - create new **ess-images.bb** recipe under meta-ess/recipes-core/image
 
     - add i2c-tools to image: modify ess-image.bb (https://i2c.wiki.kernel.org/index.php/I2C_Tools)
-
         ```console
         IMAGE_INSTALL:append = " i2c-tools"
         ```
 
     - add vim editor
-
         - modify ess-image.bb ... note: IMAGE_INSTALL += usage, the symbol must exist already for += vs "append", :prepend also exists
 
             ```console
@@ -139,17 +138,27 @@
             ```
 
     - **overlayfs-etc** allows /etc modifications over a ro rootfs
-
         ```console
         # see raspberrypi4-64-ess.conf for machine conf parts of overlayfs
         IMAGE_FEATURES:append = " overlayfs-etc"
         ```
 
     - timezone config
-
         ```console
         # timezone configuration
         IMAGE_INSTALL:append = " tzdata"
+        ```
+
+    - generic user space app
+        ```console
+        IMAGE_INSTALL:append = " ess-canonical-app"
+        ```
+
+    - rootfs task extension example
+        ```console
+        do_rootfs_append() {
+            ...
+        }
         ```
 
 - source yocto build environment script targeting "./build-rpi-ess" destination directory and create ./local.conf if non-existent
@@ -244,204 +253,272 @@
 
 ## image testing
 
-    - test i2c tools
-
+- wifi test
+    - networkinterface wlan0 configuration
         ```console
-        $ i2c
-        $ ls /dev/i2c*
-        $ i2cdetect
+        root@ess-hostname:~# cat /etc/network/interfaces
+        ...
+        # Wireless interfaces
+        iface wlan0 inet dhcp
+        wireless_mode managed
+        wireless_essid any
+        wpa-driver wext
+        wpa-conf /etc/wpa_supplicant.conf
+        ```
+    - wpa_supplicant.conf file configuration
+        ```console
+        root@ess-hostname:~# cat /etc/wpa_supplicant.conf
+        ctrl_interface=/var/run/wpa_supplicant
+        ctrl_interface_group=0
+        update_config=1
+
+        network={
+                ssid="<network name here>"
+                psk="<password here>"
+                proto=RSN
+                key_mgmt=WPA-PSK
+                pairwise=CCMP
+                auth_alg=OPEN
+        }
+        root@ess-hostname:~# ifup -v wlan0
         ```
 
-        - i2c configuration resides in cat /boot/config.txt
+    - ping from host
 
-            ```console
-            root@ess-hostname:~# cat /boot/config.txt | grep
-            ...
-            dtparam=i2c1=on
-            dtparam=i2c_arm=on
-            ```
-
-    - verify machine name by /dev/hostname and console prompt
-
+    - auto start wifi
         ```console
-        root@ess-hostname:~# cat /etc/hostname
-        ess-hostname
+        root@ess-hostname:~# systemctl enable wpa_supplicant@wlan0.conf
+        ```
+        creates a symlink
+        ```console
+        root@ess-hostname:~# ls -l /etc/systemd/system/multi-user.target.wants/
+        ...
+        lrwxrwxrwx    1 root     root            43 Apr 28 15:41 wpa_supplicant@wlan0.conf.service -> /lib/systemd/system/wpa_supplicant@.service
         ```
 
-    - verify systemd installation
+- ssh server test
+    - boot target
+    - identify ip address
+    - on target ifup <address> until networkd is autostarting it
+    - ssh root@<ip address>
 
-        - list active units
-            ```console
-            root@ess-hostname:~# systemctl list-units
-            ```
+- test i2c tools
 
-        - list all units
-            ```console
-            root@ess-hostname:~# systemctl list-units --all
-            ```
+    ```console
+    $ i2c
+    $ ls /dev/i2c*
+    $ i2cdetect
+    ```
 
-        - list service dependencies
-            ```console
-            root@ess-hostname:~# systemctl list-dependencies systemd-networkd.service
-            root@ess-hostname:~# systemctl list-dependencies -all systemd-networkd.service
-            ```
-
-        - query service status
-            ```console
-            root@ess-hostname:~# systemctl list-units | grep service
-            root@ess-hostname:~# systemctl status systemd-networkd.service
-            ```
-
-        - query service config file
-            ```console
-            root@ess-hostname:~# systemctl cat systemd-networkd.service
-            ```
-
-        - edit service config rile
-            ```console
-                root@ess-hostname:~# systemctl edit -full systemd-networkd.service
-                root@ess-hostname:~# systemctl edit --full systemd-networkd.service
-            ```
-
-        - query service properties
-            ```console
-            root@ess-hostname:~# systemctl show systemd-networkd.service
-            ```
-
-        - inspect systemd targets (similar to sysv run levels)
-
-            - get boot target
-                ```console
-                root@ess-hostname:~# systemctl get-default
-                ```
-
-            - set a new boot target
-                ```console
-                root@ess-hostname:~# systemctl set-default <a new target>
-                ```
-
-            - list all possible targets. note sysv runlevel targets aliased to systemd targets.
-                ```console
-                root@ess-hostname:~# systemctl list-unit-files --type=target
-                ```
-
-            - list target dependencies
-                ```console
-                root@ess-hostname:~# systemctl list-dependencies multi-user.target
-                ```
-
-            - list target dependencies
-                ```console
-                root@ess-hostname:~# systemctl poweroff
-                root@ess-hostname:~# systemctl reboot
-                root@ess-hostname:~# systemctl rescue
-                ```
-
-    - verify systemd journald installation
-
-        - journald log file location
-            ```console
-            root@ess-hostname:~# cat /run/log/journal/de0c16ccdb00407ab5ffdf0ac63d5e5b/system.journal
-            ```
-
-        - check journald file persistence configuration
-            ```console
-            root@ess-hostname:~# cat /etc/systemd/journald.conf | grep Storage
-            ```
-
-        - entire log
-            ```console
-            root@ess-hostname:~# journalctl
-            ```
-
-        - current boot only log
-            ```console
-            root@ess-hostname:~# journalctl -b
-            ```
-
-        - current boot only kernel log
-            ```console
-            root@ess-hostname:~# journalctl -k -b
-            ```
-
-        - logs specific to a service
-            ```console
-            root@ess-hostname:~# journalctl -u systemd-networkd.service
-            ```
-
-        - verify /etc overlayfs-etc
-            ```console
-            root@ess-hostname:~# ls -l /data/overlay-etc/work/
-            d---------    2 root     root          4096 Jan  1  1970 work
-            root@ess-hostname:~# ls -l /data/overlay-etc/upper/
-            -rw-r--r--    1 root     root           695 Apr 28 17:42 group
-            -rw-r--r--    1 root     root           681 Mar  9  2018 group-
-            -r--------    1 root     root           582 Apr 28 17:42 gshadow
-            -r--------    1 root     root           570 Mar  9  2018 gshadow-
-            -rw-r--r--    1 root     root          3687 Apr 28 17:42 ld.so.cache
-            -rw-r--r--    1 root     root            33 Apr 28 17:42 machine-id
-
-            root@ess-hostname:~# echo ess-hostname-overlay > /etc/hostname
-            root@ess-hostname:~# cat /etc/hostname
-            ess-hostname-overlay
-
-            root@ess-hostname:~# shutdown -r now
-            ...
-
-            root@ess-hostname-overlay:~# ls -l /data/overlay-etc/upper/
-            -rw-r--r--    1 root     root           695 Apr 28 17:42 group
-            -rw-r--r--    1 root     root           681 Mar  9  2018 group-
-            -r--------    1 root     root           582 Apr 28 17:42 gshadow
-            -r--------    1 root     root           570 Mar  9  2018 gshadow-
-            -rw-r--r--    1 root     root            21 Apr 28 19:37 hostname
-            -rw-r--r--    1 root     root          3687 Apr 28 17:42 ld.so.cache
-            -rw-r--r--    1 root     root            33 Apr 28 17:42 machine-id
-
-            root@ess-hostname-overlay:~# rm -rf /data/overlay-etc/
-
-            root@ess-hostname:~# shutdown -r now
-            ...
-
-            root@ess-hostname:~#
-            ```
-
-    - verify tzdata support
+    - i2c configuration resides in cat /boot/config.txt
 
         ```console
-        root@ess-hostname:~# timedatectl list-timezones
-
-        root@ess-hostname:~# timedatectl show
-        Timezone=America/Los_Angeles
-        LocalRTC=no
-        CanNTP=yes
-        NTP=yes
-        NTPSynchronized=no
-        TimeUSec=Thu 2022-04-28 10:43:16 PDT
-
-        root@ess-hostname:~# timedatectl set-timezone Pacific/Tahiti
-        root@ess-hostname:~# timedatectl show
-        Timezone=Pacific/Tahiti
-        LocalRTC=no
-        CanNTP=yes
-        NTP=yes
-        NTPSynchronized=no
-        TimeUSec=Thu 2022-04-28 07:48:31 -10
-
-        root@ess-hostname:~# timedatectl set-timezone UTC
-        root@ess-hostname:~# timedatectl show
-        Timezone=UTC
-        LocalRTC=no
-        CanNTP=yes
-        NTP=yes
-        NTPSynchronized=no
-        TimeUSec=Thu 2022-04-28 17:49:28 UTC
+        root@ess-hostname:~# cat /boot/config.txt | grep
+        ...
+        dtparam=i2c1=on
+        dtparam=i2c_arm=on
         ```
 
-    - test qemu (core-image-minimal) builds
+- verify machine name by /dev/hostname and console prompt
+
+    ```console
+    root@ess-hostname:~# cat /etc/hostname
+    ess-hostname
+    ```
+
+- verify systemd installation
+
+    - list currently running services
         ```console
-        pokyuser:/workdir/bsp/build$ runqemu qemux86-64 core-image-minimal slirp nographic
+            root@ess-hostname:~# systemctl --type=service
+            ```
+
+    - list active units
+        ```console
+        root@ess-hostname:~# systemctl list-units
         ```
-        - to exit qemu console enter Ctrl-A (press and release) followed by x
+
+    - list all units
+        ```console
+        root@ess-hostname:~# systemctl list-units --all
+        ```
+
+    - list service dependencies
+        ```console
+        root@ess-hostname:~# systemctl list-dependencies systemd-networkd.service
+        root@ess-hostname:~# systemctl list-dependencies -all systemd-networkd.service
+        ```
+
+    - query service status
+        ```console
+        root@ess-hostname:~# systemctl list-units | grep service
+        root@ess-hostname:~# systemctl status systemd-networkd.service
+        ```
+
+    - query service config file
+        ```console
+        root@ess-hostname:~# systemctl cat systemd-networkd.service
+        ```
+
+    - edit service config rile
+        ```console
+            root@ess-hostname:~# systemctl edit -full systemd-networkd.service
+            root@ess-hostname:~# systemctl edit --full systemd-networkd.service
+        ```
+
+    - query service properties
+        ```console
+        root@ess-hostname:~# systemctl show systemd-networkd.service
+        ```
+
+    - inspect systemd targets (similar to sysv run levels)
+
+        - get boot target
+            ```console
+            root@ess-hostname:~# systemctl get-default
+            ```
+
+        - set a new boot target
+            ```console
+            root@ess-hostname:~# systemctl set-default <a new target>
+            ```
+
+        - list all possible targets. note sysv runlevel targets aliased to systemd targets.
+            ```console
+            root@ess-hostname:~# systemctl list-unit-files --type=target
+            ```
+
+        - list target dependencies
+            ```console
+            root@ess-hostname:~# systemctl list-dependencies multi-user.target
+            ```
+
+        - list target dependencies
+            ```console
+            root@ess-hostname:~# systemctl poweroff
+            root@ess-hostname:~# systemctl reboot
+            root@ess-hostname:~# systemctl rescue
+            ```
+
+    - restart service (i.e. systemd-networkd.service after conf edits)
+        ```console
+        root@ess-hostname:~# systemctl restart systemd-networkd.service
+        ```
+
+    - verify networkctl device listing
+        ```console
+        root@ess-hostname:~# networkctl list
+        IDX LINK  TYPE     OPERATIONAL SETUP
+        1 lo    loopback carrier     unmanaged
+        2 eth0  ether    no-carrier  configuring
+        3 wlan0 wlan     no-carrier  configuring
+        ```
+
+- verify systemd journald installation
+
+    - journald log file location
+        ```console
+        root@ess-hostname:~# cat /run/log/journal/de0c16ccdb00407ab5ffdf0ac63d5e5b/system.journal
+        ```
+
+    - check journald file persistence configuration
+        ```console
+        root@ess-hostname:~# cat /etc/systemd/journald.conf | grep Storage
+        ```
+
+    - entire log
+        ```console
+        root@ess-hostname:~# journalctl
+        ```
+
+    - current boot only log
+        ```console
+        root@ess-hostname:~# journalctl -b
+        ```
+
+    - current boot only kernel log
+        ```console
+        root@ess-hostname:~# journalctl -k -b
+        ```
+
+    - logs specific to a service
+        ```console
+        root@ess-hostname:~# journalctl -u systemd-networkd.service
+        ```
+
+- verify /etc overlayfs-etc
+    ```console
+    root@ess-hostname:~# ls -l /data/overlay-etc/work/
+    d---------    2 root     root          4096 Jan  1  1970 work
+    root@ess-hostname:~# ls -l /data/overlay-etc/upper/
+    -rw-r--r--    1 root     root           695 Apr 28 17:42 group
+    -rw-r--r--    1 root     root           681 Mar  9  2018 group-
+    -r--------    1 root     root           582 Apr 28 17:42 gshadow
+    -r--------    1 root     root           570 Mar  9  2018 gshadow-
+    -rw-r--r--    1 root     root          3687 Apr 28 17:42 ld.so.cache
+    -rw-r--r--    1 root     root            33 Apr 28 17:42 machine-id
+
+    root@ess-hostname:~# echo ess-hostname-overlay > /etc/hostname
+    root@ess-hostname:~# cat /etc/hostname
+    ess-hostname-overlay
+
+    root@ess-hostname:~# shutdown -r now
+    ...
+
+    root@ess-hostname-overlay:~# ls -l /data/overlay-etc/upper/
+    -rw-r--r--    1 root     root           695 Apr 28 17:42 group
+    -rw-r--r--    1 root     root           681 Mar  9  2018 group-
+    -r--------    1 root     root           582 Apr 28 17:42 gshadow
+    -r--------    1 root     root           570 Mar  9  2018 gshadow-
+    -rw-r--r--    1 root     root            21 Apr 28 19:37 hostname
+    -rw-r--r--    1 root     root          3687 Apr 28 17:42 ld.so.cache
+    -rw-r--r--    1 root     root            33 Apr 28 17:42 machine-id
+
+    root@ess-hostname-overlay:~# rm -rf /data/overlay-etc/
+
+    root@ess-hostname:~# shutdown -r now
+    ...
+
+    root@ess-hostname:~#
+    ```
+
+- verify tzdata support
+
+    ```console
+    root@ess-hostname:~# timedatectl list-timezones
+
+    root@ess-hostname:~# timedatectl show
+    Timezone=America/Los_Angeles
+    LocalRTC=no
+    CanNTP=yes
+    NTP=yes
+    NTPSynchronized=no
+    TimeUSec=Thu 2022-04-28 10:43:16 PDT
+
+    root@ess-hostname:~# timedatectl set-timezone Pacific/Tahiti
+    root@ess-hostname:~# timedatectl show
+    Timezone=Pacific/Tahiti
+    LocalRTC=no
+    CanNTP=yes
+    NTP=yes
+    NTPSynchronized=no
+    TimeUSec=Thu 2022-04-28 07:48:31 -10
+
+    root@ess-hostname:~# timedatectl set-timezone UTC
+    root@ess-hostname:~# timedatectl show
+    Timezone=UTC
+    LocalRTC=no
+    CanNTP=yes
+    NTP=yes
+    NTPSynchronized=no
+    TimeUSec=Thu 2022-04-28 17:49:28 UTC
+    ```
+
+- test qemu (core-image-minimal) builds
+    ```console
+    pokyuser:/workdir/bsp/build$ runqemu qemux86-64 core-image-minimal slirp nographic
+    ```
+    - to exit qemu console enter Ctrl-A (press and release) followed by x
 
 
 ## other bitbake operations
@@ -477,6 +554,15 @@
 - clean the vim package
     ```console
     pokyuser:/workdir/bsp/build$ bitbake -c clean vim
+    ```
+- poky license file types
+    ```console
+    pokyuser:/workdir/bsp/build-rpi-ess$ ls ../sources/poky/meta/files/common-licenses
+    ```
+- determine compiler version used by bitbake ... see sources/poky/meta/recipes-devtools/gcc
+    ```console
+    pokyuser@187b916fc0eb:/workdir/bsp/build-rpi-ess$ bitbake -e | grep "^GCCVERSION="
+GCCVERSION="11.%"
     ```
 
 ## boot sequence
@@ -547,3 +633,8 @@ https://www.raspberrypi.com/documentation/computers/config_txt.html
 https://www.raspberrypi.com/documentation/computers/configuration.html#configuring-uarts
 #### stacked processor numbers
 https://www.raspberrypi.com/documentation/computers/processors.html
+
+### linux references
+#### systemd-networkd network manager
+https://wiki.archlinux.org/title/systemd-networkd#:~:text=In%20order%20to%20connect%20to,wpa_supplicant%20or%20iwd%20is%20required.&text=If%20the%20wireless%20adapter%20has,as%20in%20a%20wired%20adapter
+https://wiki.archlinux.org/title/wpa_supplicant#Connecting_with_wpa_cli

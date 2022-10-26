@@ -27,3 +27,18 @@ IMAGE_FEATURES:append = " overlayfs-etc"
 #inherit extrausers
 #EXTRA_USERS_PARAMS = "usermod -p $(openssl passwd ess@pwd) root;"
 
+# example for a recipe extension
+# bitbake -c listtasks ess-image | grep do_rootfs
+do_rootfs:append() {
+    # see sources/poky/meta/classes/logging.bbclass
+    bb.warn("ess-image.bb do_rootfs_append()")
+}
+
+# dropbear ssh evaluation ... move to openssh later
+IMAGE_FEATURES:append = " ssh-server-dropbear"
+
+# generic user space app
+IMAGE_INSTALL:append = " ess-canonical-app"
+
+# python3
+IMAGE_INSTALL:append = " python3"
