@@ -217,7 +217,7 @@
 
 ## SD card image flashing
 
-- resulting images in /workdir/bsp/build$tmp/deploy/images/raspberrypi4-64/. several means available to flash images to SD card: yocto **bmaptool** utility (wic file), 'Raspberry Pi Imager' (wic file), dd (wic file), manual partitioning/formatting/copying.
+- resulting images in /workdir/bsp/build$tmp/deploy/images/raspberrypi4-64/. several means available to flash images to SD card: yocto **bmaptool** utility (wic file), rpi-imager 'Raspberry Pi Imager' (wic file), dd (wic file), manual partitioning/formatting/copying.
 
 - flash rpi-test-image-raspberrypi4-64.wic.bz2 (boot and root images) to SD card
 
@@ -239,19 +239,45 @@
                 - $ umount /media/\<name>/root
                 ```
             - **bmaptool** the wic file
-
                 ```console
                 host$ sudo bmaptool copy tmp/deploy/images/raspberrypi4-64/rpi-test-image-raspberrypi4-64.wic.bz2 /dev/sdc
                 ```
+
     - create ext4 for overlayfs usage
 
         - fdisk a new partition
+            ```console
+            host$ fdisk /dev/sdc
+            ```
         - configure ext4 in partition
             ```console
             $ sudo mkfs.ext4 -L data /dev/sdc3
             ```
 
 ## image testing
+
+- verify flask server
+    - place rpi on network with eth0 or wlan
+        - verify service is running and logging
+        ```console
+        root@ess-hostname:~# systemctl status flask-ess-application
+        * flask-ess-application.service - Flash ESS application
+            Loaded: loaded (8;;file://ess-hostname/lib/systemd/system/flask-ess-application.service/lib/systemd/system/flask-ess-applicat)
+            Active: active (running) since Thu 2022-04-28 11:07:00 PDT; 2min 45s ago
+        Main PID: 259 (python3)
+            Tasks: 4 (limit: 1828)
+            CGroup: /system.slice/flask-ess-application.service
+                    `- 259 python3 /usr/bin/flask-ess-application.py
+
+        root@ess-hostname:~# journalctl -u  flask-ess-application | grep Flask
+        Apr 28 11:07:02 ess-hostname flask-ess-application.py[259]:  * Serving Flask app 'flask-ess-application' (lazy loading)
+        ...
+        ...
+        ```
+        - in a browser enter the following address 192.168.1.25:5000 and verify script returning expected info
+        ```console
+        Linux ess-hostname 5.15.34-v8 #1 SMP PREEMPT Tue Apr 19 19:21:26 UTC 2022 aarch64 GNU/Linux
+        ```
 
 - wifi test
     - networkinterface wlan0 configuration

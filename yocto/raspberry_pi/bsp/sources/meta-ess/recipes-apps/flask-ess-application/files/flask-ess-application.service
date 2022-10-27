@@ -1,0 +1,13 @@
+[Unit]
+Description=Flash ESS application
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10s
+StandardOutput=journal+console
+StandardError=journal+console
+ExecStart=/usr/bin/flash-ess-application.py
+
+[Install]
+WantedBy=multi-user.target

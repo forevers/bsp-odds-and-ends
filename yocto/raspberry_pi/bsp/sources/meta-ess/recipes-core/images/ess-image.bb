@@ -1,8 +1,9 @@
 # Base this image on core-image-base
 # 'require' is another directive which is similar to 'include', but the major difference
 #   is that 'require' will throw an error when it doesn't find that file.
-#include recipes-core/images/core-image-base.bb
 require recipes-core/images/core-image-base.bb
+
+#require recipes-core/packagegroups/packagegroup-meta-python.bb
 
 # i2c-tools (https://i2c.wiki.kernel.org/index.php/I2C_Tools)
 # use IMAGE_INSTALL:append instead of +=
@@ -42,3 +43,7 @@ IMAGE_INSTALL:append = " ess-canonical-app"
 
 # python3
 IMAGE_INSTALL:append = " python3"
+IMAGE_INSTALL:append = " python3-flask"
+
+# flask demo application
+IMAGE_INSTALL:append = " flask-ess-application"
