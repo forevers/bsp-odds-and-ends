@@ -66,7 +66,7 @@
             ```
         - PARALLEL_MAKE -j option for make. Set same as BB_NUMBER_THREADS (should not be set > 20).
             ```console
-            pokyuser:/workdir$ export PARALLEL_MAKE=12
+            pokyuser:/workdir$ export PARALLEL_MAKE=-j12
             ```
 
 ## **ess-distro** distro recipe **ess-image** on machine **raspberrypi4-64-ess**
@@ -626,8 +626,9 @@ https://docs.yoctoproject.org/ref-manual/features.html#distro-features
 https://docs.yoctoproject.org/ref-manual/features.html#image-features
 #### yocto docker container
 https://github.com/crops/docker-win-mac-docs/wiki
-#### poky
+#### poky crops docker image
 https://github.com/crops/poky-container
+https://embeddeduse.com/2019/05/06/yocto-builds-with-crops-containers/
 #### sdk container
 https://github.com/crops/extsdk-container/blob/master/README.md
 #### meta-raspberrypi docs
@@ -642,12 +643,13 @@ https://kas.readthedocs.io/en/3.1/intro.html
 bsp/sources/poky/documentation/dev-manual/common-tasks.rst
 #### overlayfs-etc IMAGE_FEATURE
 https://docs.kernel.org/filesystems/overlayfs.html
+#### bitbake env symbols
+raspberry_pi/bsp/sources/poky/meta/conf/bitbake.conf
 
 #### other yocto references
 https://low-level.wiki/yocto/cheatsheet.html
 https://elinux.org/images/3/3c/Yps2021.11-beginner.pdf
 https://embeddeduse.com/2022/06/24/setting-up-yocto-projects-with-kas/
-https://embeddeduse.com/2019/05/06/yocto-builds-with-crops-containers/
 https://lancesimms.com/RaspberryPi/HackingRaspberryPi4WithYocto_Introduction.html
 
 ### raspberry pi references
@@ -664,3 +666,7 @@ https://www.raspberrypi.com/documentation/computers/processors.html
 #### systemd-networkd network manager
 https://wiki.archlinux.org/title/systemd-networkd#:~:text=In%20order%20to%20connect%20to,wpa_supplicant%20or%20iwd%20is%20required.&text=If%20the%20wireless%20adapter%20has,as%20in%20a%20wired%20adapter
 https://wiki.archlinux.org/title/wpa_supplicant#Connecting_with_wpa_cli
+
+### flask references
+https://flask.palletsprojects.com/en/2.2.x/quickstart/#a-minimal-application
+https://hackersandslackers.com/flask-routes/
