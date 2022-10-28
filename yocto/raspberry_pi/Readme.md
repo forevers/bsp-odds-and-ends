@@ -111,6 +111,10 @@
         VIRTUAL-RUNTIME_init_manager = "systemd"
         ```
 
+        ``` support wifi credential application
+        DISTRO_FEATURES:append = " wpa_supplicant"
+        ```
+
     - reducing distro feature list in **ess-distro.conf**
 
         ```console
@@ -160,6 +164,22 @@
             ...
         }
         ```
+
+- custom recipe (extensions)
+
+    - recipes-apps
+        - ess-canonical-app :
+            - demonstrates bb file configuration
+        - flash-ess-application :
+            - configures a flask server
+
+    - recipes-core/systemd-conf :
+        - systemd network configuration
+        - install network files for various interfaces
+
+    - recipes-connectivity/wpa-supplicant :
+        - SYSTEMD_AUTO_ENABLE'ing the service in did not created the required systemd symlink
+        - manually create symlink in recipe
 
 - source yocto build environment script targeting "./build-rpi-ess" destination directory and create ./local.conf if non-existent
 
@@ -213,7 +233,7 @@
         ```
     -  device tree can be inspected on target under /proc/device-tree
 
-- rootfs location: build-rpi/tmp/work/raspberrypi4_64-poky-linux/rpi-test-image/1.0-r0/rootfs
+- rootfs location: build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/ess-image/1.0-r0/rootfs
 
 ## SD card image flashing
 
@@ -293,7 +313,7 @@
         ```
     - wpa_supplicant.conf file configuration
         ```console
-        root@ess-hostname:~# cat /etc/wpa_supplicant.conf
+        root@ess-hostname:~# cat /etc/wpa_supplicant/wpa_supplicant@wlan0.conf
         ctrl_interface=/var/run/wpa_supplicant
         ctrl_interface_group=0
         update_config=1
@@ -665,7 +685,7 @@ https://www.raspberrypi.com/documentation/computers/processors.html
 ### linux references
 #### systemd-networkd network manager
 https://wiki.archlinux.org/title/systemd-networkd#:~:text=In%20order%20to%20connect%20to,wpa_supplicant%20or%20iwd%20is%20required.&text=If%20the%20wireless%20adapter%20has,as%20in%20a%20wired%20adapter
-https://wiki.archlinux.org/title/wpa_supplicant#Connecting_with_wpa_cli
+https://wiki.archlinux.org/title/wpa_supplicant
 
 ### flask references
 https://flask.palletsprojects.com/en/2.2.x/quickstart/#a-minimal-application
