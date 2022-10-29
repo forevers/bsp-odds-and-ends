@@ -18,6 +18,9 @@
 - tzdata
 - ess-canonical-app - generic user space application
 - python3
+- flask application - web browser target communication
+- extended root env via systemd script
+- modified /etc/profile defaults for newly created user accounts
 
 ## yocto layers
 
@@ -181,6 +184,15 @@
         - SYSTEMD_AUTO_ENABLE'ing the service in did not created the required systemd symlink
         - manually create symlink in recipe
 
+    - recipes-core
+        - base-files :
+            - default skel .bashrc modified
+        - images
+            - ess-image.bb added
+        - systemd
+            - root shell env modified
+            - added systemd network files
+
 - source yocto build environment script targeting "./build-rpi-ess" destination directory and create ./local.conf if non-existent
 
     ```console
@@ -280,17 +292,17 @@
     - place rpi on network with eth0 or wlan
         - verify service is running and logging
         ```console
-        root@ess-hostname:~# systemctl status flask-ess-application
-        * flask-ess-application.service - Flash ESS application
-            Loaded: loaded (8;;file://ess-hostname/lib/systemd/system/flask-ess-application.service/lib/systemd/system/flask-ess-applicat)
+        root@ess-hostname:~# systemctl status ess-flask-app
+        * ess-flask-app.service - Flash ESS application
+            Loaded: loaded (8;;file://ess-hostname/lib/systemd/system/ess-flask-app.service/lib/systemd/system/ess-flask-app)
             Active: active (running) since Thu 2022-04-28 11:07:00 PDT; 2min 45s ago
         Main PID: 259 (python3)
             Tasks: 4 (limit: 1828)
-            CGroup: /system.slice/flask-ess-application.service
-                    `- 259 python3 /usr/bin/flask-ess-application.py
+            CGroup: /system.slice/ess-flask-appservice
+                    `- 259 python3 /usr/bin/ess-flask-app.py
 
-        root@ess-hostname:~# journalctl -u  flask-ess-application | grep Flask
-        Apr 28 11:07:02 ess-hostname flask-ess-application.py[259]:  * Serving Flask app 'flask-ess-application' (lazy loading)
+        root@ess-hostname:~# journalctl -u  ess-flask-app | grep Flask
+        Apr 28 11:07:02 ess-hostname ess-flask-app.py[259]:  * Serving Flask app 'ess-flask-app' (lazy loading)
         ...
         ...
         ```

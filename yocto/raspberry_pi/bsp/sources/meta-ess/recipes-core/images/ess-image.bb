@@ -46,4 +46,4 @@ IMAGE_INSTALL:append = " python3"
 IMAGE_INSTALL:append = " python3-flask"
 
 # flask demo application
-IMAGE_INSTALL:append = " flask-ess-application"
+IMAGE_INSTALL:append = " ess-flask-app"

@@ -1,5 +1,5 @@
 [Unit]
-Description=Flash ESS application
+Description=ESS Flask application
 
 [Service]
 Type=simple
@@ -7,7 +7,7 @@ Restart=always
 RestartSec=10s
 StandardOutput=journal+console
 StandardError=journal+console
-ExecStart=/usr/bin/flash-ess-application.py
+ExecStart=/usr/bin/ess-flask-app.py
 
 [Install]
 WantedBy=multi-user.target
