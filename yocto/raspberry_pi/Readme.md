@@ -217,11 +217,70 @@
     /workdir/bsp/sources/meta-ess \
     ```
 
-- update layer.conf with new machine name
+- update build-rpi-ess/conf/local.conf with new machine name
 
     ```console
     MACHINE = "raspberrypi4-64-ess"
     ```
+
+- kernel config method examples
+
+    - complete defconfig file replacement
+
+        - the default config file for this the rpi4 64bit kernel is located in workspace/sources/linux-raspberrypi/arch/arm64
+
+        - one can override the upstream kernel defconfig file. the general idea is to build the kernel once, and either directly rename the created .config file as defconfig and perform manual edits on it, or run menuconfig to create a .config.new file and rename that as defconfig.
+
+        - this example will use devtool to create a workspace outside the yocto build directory tree structure for sandbox development. a sandbox is created containing to linux kernel recipe sources/meta-raspberrypi/recipes-kernel/linux/linux-raspberrypi-5.15.bb recipe.
+
+        - devtool the kernel recipe
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify linux-raspberrypi
+            ...
+            INFO: Recipe linux-raspberrypi now set up to build from /workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi
+            pokyuser:/workdir/bsp/build-rpi-ess$ cd ./workspace/sources/linux-raspberrypi
+            ```
+
+        - bitbake the kernel menuconfig (bitbake menuconfig supported for both kernel and busybox)
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ bitbake linux-raspberrypi -c menuconfig
+            ...
+            ````
+
+        - select Kernel hacking > Memory Debugging :  "Stack utilization instrumentation" to configure CONFIG_DEBUG_STACK_USAGE as set, save out of the menuconfig and verify configuration change
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat .config.baseline | grep CONFIG_DEBUG_STACK_USAGE
+            # CONFIG_DEBUG_STACK_USAGE is not set
+
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat .config.new | grep CONFIG_DEBUG_STACK_USAGE
+            CONFIG_DEBUG_STACK_USAGE=y
+            ```
+
+        - the diffconfig utility can also be used to create a fragment file showing differences between the old and new kernel configs
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ bitbake linux-raspberrypi -c diffconfig
+            ...
+            Config fragment has been dumped into:
+            /workdir/bsp/build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/linux-raspberrypi/1_5.15.34+git999-r0/fragment.cfg
+
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat /workdir/bsp/build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/linux-raspberrypi/1_5.15.34+git999-r0/fragment.cfg
+            CONFIG_DEBUG_STACK_USAGE=y
+            ```
+
+        - create bbappend file for linux kernel with the defconfig file mentioned above as the source target
+
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cp .config.new /workdir/bsp/sources/meta-ess/recipes-kernel/linux/linux-raspberrypi/defconfig
+
+            pokyuser:/workdir/bsp/build-rpi-ess$ cat ../sources/meta-ess/recipes-kernel/linux/linux-raspberrypi_%.bbappend
+
+            FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+            SRC_URI += "file://defconfig"
+            unset KBUILD_DEFCONFIG
+            KCONFIG_MODE = "alldefconfig"
+            ```
+    - fragment configuration change
+
 
 - bake an **ess-image image**, takes about 50 minutes on 12 core system
 
@@ -303,7 +362,6 @@
 
         root@ess-hostname:~# journalctl -u  ess-flask-app | grep Flask
         Apr 28 11:07:02 ess-hostname ess-flask-app.py[259]:  * Serving Flask app 'ess-flask-app' (lazy loading)
-        ...
         ...
         ```
         - in a browser enter the following address 192.168.1.25:5000 and verify script returning expected info
@@ -540,6 +598,14 @@
     root@ess-hostname:~#
     ```
 
+- verify stack usage in kernel log
+    ```console
+    root@ess-hostname:~# journalctl -b | grep "used greatest stack depth"
+    Apr 28 10:42:27 ess-hostname kernel: cryptomgr_test (44) used greatest stack depth: 15232 bytes left
+    Apr 28 10:42:27 ess-hostname kernel: cryptomgr_test (45) used greatest stack depth: 14880 bytes left
+    ...
+    ```
+
 - verify tzdata support
 
     ```console
@@ -585,7 +651,7 @@
     ```console
     pokyuser:/workdir/bsp/build$ bitbake -s
     ```
-- list all recipe tasks
+- list all recipe tasks for specific recipe
     ```console
     pokyuser:/workdir/bsp/build$ bitbake -c listtasks ess-image
     ```
@@ -599,7 +665,7 @@
     ```
 - search for location of vim recipe
     ```console
-    pokyuser@187b916fc0eb:/workdir/bsp/build-rpi-ess$ bitbake-layers show-recipes vim
+    pokyuser:/workdir/bsp/build-rpi-ess$ bitbake-layers show-recipes vim
     ...
     === Matching recipes: ===
     vim:
@@ -619,7 +685,7 @@
     ```
 - determine compiler version used by bitbake ... see sources/poky/meta/recipes-devtools/gcc
     ```console
-    pokyuser@187b916fc0eb:/workdir/bsp/build-rpi-ess$ bitbake -e | grep "^GCCVERSION="
+    pokyuser:/workdir/bsp/build-rpi-ess$ bitbake -e | grep "^GCCVERSION="
 GCCVERSION="11.%"
     ```
 
