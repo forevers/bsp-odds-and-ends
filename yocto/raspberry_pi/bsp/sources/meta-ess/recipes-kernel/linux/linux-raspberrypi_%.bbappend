@@ -1,6 +1,9 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI += "file://defconfig"
+SRC_URI += " \
+    file://defconfig \
+    file://01_kernel_memory_dbg.cfg \
+    "
 
 # Prevent the use of in-tree defconfig
 # was set to meta-raspberrypi/recipes-kernel/linux/linux-raspberrypi.inc

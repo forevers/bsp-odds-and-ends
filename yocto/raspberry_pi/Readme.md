@@ -21,6 +21,7 @@
 - flask application - web browser target communication
 - extended root env via systemd script
 - modified /etc/profile defaults for newly created user accounts
+- kernel config modification (defconfig and cfg file based)
 
 ## yocto layers
 
@@ -247,14 +248,14 @@
             ...
             ````
 
-        - select Kernel hacking > Memory Debugging :  "Stack utilization instrumentation" to configure CONFIG_DEBUG_STACK_USAGE as set, save out of the menuconfig and verify configuration change
-            ```console
-            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat .config.baseline | grep CONFIG_DEBUG_STACK_USAGE
-            # CONFIG_DEBUG_STACK_USAGE is not set
+            - select Kernel hacking > Memory Debugging :  "Stack utilization instrumentation" to configure CONFIG_DEBUG_STACK_USAGE as set, save out of the menuconfig and verify configuration change
+                ```console
+                pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat .config.baseline | grep CONFIG_DEBUG_STACK_USAGE
+                # CONFIG_DEBUG_STACK_USAGE is not set
 
-            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat .config.new | grep CONFIG_DEBUG_STACK_USAGE
-            CONFIG_DEBUG_STACK_USAGE=y
-            ```
+                pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat .config.new | grep CONFIG_DEBUG_STACK_USAGE
+                CONFIG_DEBUG_STACK_USAGE=y
+                ```
 
         - the diffconfig utility can also be used to create a fragment file showing differences between the old and new kernel configs
             ```console
@@ -279,8 +280,44 @@
             unset KBUILD_DEFCONFIG
             KCONFIG_MODE = "alldefconfig"
             ```
+
     - fragment configuration change
 
+        - devtool the kernel recipe
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify linux-raspberrypi
+            ...
+            INFO: Recipe linux-raspberrypi now set up to build from /workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi
+            pokyuser:/workdir/bsp/build-rpi-ess$ cd ./workspace/sources/linux-raspberrypi
+            ```
+
+        - bitbake the kernel menuconfig (bitbake menuconfig supported for both kernel and busybox)
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ bitbake linux-raspberrypi -c menuconfig
+            ...
+            ````
+
+            - select Kernel hacking > Memory Debugging :  "Kernel memory leak detector" to configure
+            CONFIG_DEBUG_KMEMLEAK as set, save out of the menuconfig and verify configuration change
+
+        - use the diffconfig utility to create a fragment file showing differences between the old and new kernel configs
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ bitbake linux-raspberrypi -c diffconfig
+            ...
+            Config fragment has been dumped into:
+            /workdir/bsp/build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/linux-raspberrypi/1_5.15.34+git999-r0/fragment.cfg
+
+            pokyuser@a69dd9d8a512:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ cat /workdir/bsp/build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/linux-raspberrypi/1_5.15.34+git999-r0/fragment.cfg
+            CONFIG_DEBUG_KMEMLEAK=y
+            CONFIG_DEBUG_KMEMLEAK_MEM_POOL_SIZE=16000
+            # CONFIG_DEBUG_KMEMLEAK_TEST is not set
+            # CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF is not set
+            CONFIG_DEBUG_KMEMLEAK_AUTO_SCAN=y
+            ```
+
+        - copy the kernel config fragment in the bbappend recipe created above renaming to 01_kernel_memory_dbg.cfg
+
+        - update linux-raspberrypi_%.bbappend to include 01_kernel_memory_dbg.cfg in SRC_URI. cfg modification are applied after the defconfig has been applied
 
 - bake an **ess-image image**, takes about 50 minutes on 12 core system
 
@@ -446,8 +483,8 @@
 
     - list currently running services
         ```console
-            root@ess-hostname:~# systemctl --type=service
-            ```
+        root@ess-hostname:~# systemctl --type=service
+        ```
 
     - list active units
         ```console
@@ -636,6 +673,12 @@
     NTP=yes
     NTPSynchronized=no
     TimeUSec=Thu 2022-04-28 17:49:28 UTC
+    ```
+
+- verify kernel memory leak detection fs exposure
+    ```console
+    root@ess-hostname:~# ls /sys/kernel/debug/kmemleak
+    /sys/kernel/debug/kmemleak
     ```
 
 - test qemu (core-image-minimal) builds
