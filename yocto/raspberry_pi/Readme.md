@@ -22,8 +22,9 @@
 - extended root env via systemd script
 - modified /etc/profile defaults for newly created user accounts
 - kernel config modification (defconfig and cfg file based)
+- qt5
 
-## yocto layers
+## build environment
 
 - clone this repo
     ```console
@@ -50,7 +51,7 @@
 
         - script invocation
             ```console
-            $ ./run-poky-image.sh
+            host:/bsp-odds-and-ends/yocto/raspberry_pi$$ ./run-poky-image.sh
             ```
 
     - pretty old Ubuntu version used by crops/poky container
@@ -73,7 +74,9 @@
             pokyuser:/workdir$ export PARALLEL_MAKE=-j12
             ```
 
-## **ess-distro** distro recipe **ess-image** on machine **raspberrypi4-64-ess**
+## Custom Build Target
+
+- **ess-distro** distro recipe **ess-image** on machine **raspberrypi4-64-ess**
 
 - create custom machine layer
 
@@ -81,93 +84,32 @@
     pokyuser:/workdir/bsp/sources$ bitbake-layers create-layer meta-ess
     ```
 
-- create new machine sources/meta-ess/conf/machine/**raspberrypi4-64-ess.conf** that configures the platform
+- machine sources/meta-ess/conf/machine/***raspberrypi4-64-ess.conf*** that configures the platform
 
-    ```console
-    # override the default /etc/hostname (machine name by default)
-    hostname:pn-base-files = "ess-hostname"
+    - default hostname
+    - console shell
+    - debug serial console
+    - spidev / i2cdev
+    - overlayfs over /etc
 
-    # enable debug uart
-    ENABLE_UART = "1"
+- distro sources/meta-ess/conf/distro/***ess-distro.conf***
 
-    # enable spi-dev nodes
-    ENABLE_SPI_BUS = "1"
-
-    # enable i2c-dev nodes
-    ENABLE_I2C = "1"
-    # auto-load I2C kernel modules
-    KERNEL_MODULE_AUTOLOAD:rpi += "i2c-dev"
-
-    # ess-image.bb specifies ovelayfs-etc IMAGE_FEATURES
-    #   creates /etc overlayfs in specified mount
-    #   requires ext4 sd card parition for rw /etc data
-    OVERLAYFS_ETC_MOUNT_POINT ?= "/data"
-    OVERLAYFS_ETC_FSTYPE ?= "ext4"
-    OVERLAYFS_ETC_DEVICE ?= "/dev/mmcblk0p3"
-    ```
-
-- create new distro sources/meta-ess/conf/distro/**ess-distro.conf**
-
-    - distro configure the service manager as systemd vs default sysv
-
-        ```console
-        DISTRO_FEATURES:append = " systemd"
-        VIRTUAL-RUNTIME_init_manager = "systemd"
-        ```
-
-        ``` support wifi credential application
-        DISTRO_FEATURES:append = " wpa_supplicant"
-        ```
-
-    - reducing distro feature list in **ess-distro.conf**
-
-        ```console
-        DISTRO_FEATURES:remove = "pcmcia"
-        ```
-
+    - systemd, resolved
+    - wpa_supplicant
+    - remove unnecessary packages
     - default timezone
 
-        ```console
-        DEFAULT_TIMEZONE = "America/Los_Angeles"
-        ```
+- image recipe under meta-ess/recipes-core/image/ ***ess-images.bb***
 
-- create new **ess-images.bb** recipe under meta-ess/recipes-core/image
-
-    - add i2c-tools to image: modify ess-image.bb (https://i2c.wiki.kernel.org/index.php/I2C_Tools)
-        ```console
-        IMAGE_INSTALL:append = " i2c-tools"
-        ```
-
-    - add vim editor
-        - modify ess-image.bb ... note: IMAGE_INSTALL += usage, the symbol must exist already for += vs "append", :prepend also exists
-
-            ```console
-            IMAGE_INSTALL:append = "vim"
-            ```
-
-    - **overlayfs-etc** allows /etc modifications over a ro rootfs
-        ```console
-        # see raspberrypi4-64-ess.conf for machine conf parts of overlayfs
-        IMAGE_FEATURES:append = " overlayfs-etc"
-        ```
-
-    - timezone config
-        ```console
-        # timezone configuration
-        IMAGE_INSTALL:append = " tzdata"
-        ```
-
-    - generic user space app
-        ```console
-        IMAGE_INSTALL:append = " ess-canonical-app"
-        ```
-
-    - rootfs task extension example
-        ```console
-        do_rootfs_append() {
-            ...
-        }
-        ```
+    - i2c-tools
+    - vim
+    - timezone configuration
+    - extended linux utilities
+    - overlayfs over /etc
+    - dropbear ssh server
+    - python3
+    - flash server
+    - qt5 demos
 
 - custom recipe (extensions)
 
@@ -319,6 +261,52 @@
 
         - update linux-raspberrypi_%.bbappend to include 01_kernel_memory_dbg.cfg in SRC_URI. cfg modification are applied after the defconfig has been applied
 
+- qt5 configurations
+
+    - repos<br>
+        https://github.com/meta-qt5/meta-qt5/tree/jansa/kirkstone<br>
+        https://code.qt.io/cgit/yocto/meta-qt6.git/log/
+
+    - qt demo applications<br>
+        cinematicexperience, qt5everywheredemo
+
+    - optional qt package group<br>
+        explicitly installed packages install required qt dependency elements<br>
+        based off meta-qt5/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bb
+
+    - qt5 build configuration
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess$ cat tmp/work/cortexa72-poky-linux/qtbase/5.15.3+gitAUTOINC+c95f96550f-r0/build/config.summary
+        ```
+
+    - plugin platform dll's
+        ```console
+        root@ess-hostname:~#  ls -1 /usr/lib/plugins/platforms
+        libqeglfs.so
+        libqlinuxfb.so
+        libqminimal.so
+        libqminimalegl.so
+        libqoffscreen.so
+        libqvnc.so
+        ```
+
+    - systemd auto start service<br>
+        see meta-ess/recipes-core/systemd/systemd-conf_%.bbappend<br>
+        installs /lib/systemd/system/qt_app.service<br>
+        installs start/stop script /usr/sbin/qt_app.sh
+
+    - load testing<br>
+        platform egls runs /usr/share/qt5everywheredemo-1.0/QtDemo at about 25% CPU load<br>
+        platform linuxfb runs /usr/share/qt5everywheredemo-1.0/QtDemo at about 70% CPU load
+
+    - debugging
+        - prior to qt app launch
+            ```console
+            export QT_DEBUG_PLUGINS=1
+            ```
+
+## bake image
+
 - bake an **ess-image image**, takes about 50 minutes on 12 core system
 
     ```console
@@ -384,6 +372,20 @@
 
 ## image testing
 
+- qt5 testing
+    ```console
+    root@ess-hostname:~# qt5-opengles2-test -platform eglfs
+    root@ess-hostname:~# /usr/share/qt5everywheredemo-1.0/QtDemo -platform eglfs
+    root@ess-hostname:~# qmlscene /usr/share/qt5ledscreen-1.0/example_billboard.qml -platform eglfs
+    root@ess-hostname:~# qmlscene /usr/share/qt5ledscreen-1.0/example_combo.qml -platform eglfs
+    root@ess-hostname:~# qmlscene /usr/share/qt5ledscreen-1.0/example_hello.qml -platform eglfs
+    root@ess-hostname:~# /usr/share/qt5nmapcarousedemo-1.0/Qt5_NMap_CarouselDemo -platform eglfs
+    root@ess-hostname:~# /usr/share/qt5nmapper-1.0/Qt5_NMapper -platform eglfs
+    root@ess-hostname:~# /usr/share/qt5nmapper-1.0/Qt5_NMapper -platform eglfs
+    qmlscene /usr/share/quitbattery-1.0.0/qml/QUItBattery/main.qml -platform eglfs
+    root@ess-hostname:~# qmlscene /usr/share/quitindicators-1.0.1/qml/main.qml -platform eglfs
+    ```
+
 - verify flask server
     - place rpi on network with eth0 or wlan
         - verify service is running and logging
@@ -402,9 +404,9 @@
         ...
         ```
         - in a browser enter the following address 192.168.1.25:5000 and verify script returning expected info
-        ```console
-        Linux ess-hostname 5.15.34-v8 #1 SMP PREEMPT Tue Apr 19 19:21:26 UTC 2022 aarch64 GNU/Linux
-        ```
+            ```console
+            Linux ess-hostname 5.15.34-v8 #1 SMP PREEMPT Tue Apr 19 19:21:26 UTC 2022 aarch64 GNU/Linux
+            ```
 
 - wifi test
     - networkinterface wlan0 configuration
@@ -418,7 +420,7 @@
         wpa-driver wext
         wpa-conf /etc/wpa_supplicant.conf
         ```
-    - wpa_supplicant.conf file configuration
+    - wpa_supplicant.conf file ssid and psk configuration
         ```console
         root@ess-hostname:~# cat /etc/wpa_supplicant/wpa_supplicant@wlan0.conf
         ctrl_interface=/var/run/wpa_supplicant
@@ -515,8 +517,7 @@
 
     - edit service config rile
         ```console
-            root@ess-hostname:~# systemctl edit -full systemd-networkd.service
-            root@ess-hostname:~# systemctl edit --full systemd-networkd.service
+        root@ess-hostname:~# systemctl edit --full systemd-networkd.service
         ```
 
     - query service properties
@@ -687,7 +688,6 @@
     ```
     - to exit qemu console enter Ctrl-A (press and release) followed by x
 
-
 ## other bitbake operations
 
 - list all recipes available
@@ -731,6 +731,24 @@
     pokyuser:/workdir/bsp/build-rpi-ess$ bitbake -e | grep "^GCCVERSION="
 GCCVERSION="11.%"
     ```
+- quick return to build directory
+    ```console
+    pokyuser:/workdir/bsp/build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/linux-raspberrypi/1_5.15.34+gitAUTOINC+e1b976ee4f_0086da6acd-r0$ cd $BUILDDIR/
+    pokyuser:/workdir/bsp/build-rpi-ess$
+    ```
+- devtool
+    - list workspaces
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess$ devtool status
+        NOTE: Starting bitbake server...
+        linux-raspberrypi: /workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi
+        ```
+
+- oe-pkgdata-util
+    - list recipe files installed on target
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess$ oe-pkgdata-util list-pkg-files <recipe name>
+        ```
 
 ## boot sequence
 
@@ -811,3 +829,20 @@ https://wiki.archlinux.org/title/wpa_supplicant
 ### flask references
 https://flask.palletsprojects.com/en/2.2.x/quickstart/#a-minimal-application
 https://hackersandslackers.com/flask-routes/
+
+### qt references
+
+#### qt5/6 in linux
+https://doc.qt.io/qt-5/embedded-linux.html
+https://doc.qt.io/qt-6/embedded-linux.html
+
+#### qt5/6 platform abstraction
+https://doc.qt.io/qt-5/qpa.html
+##### graphical backend managers
+    https://doc.qt.io/qt-5/embedded-linux.html#embedded-eglfs
+    https://doc.qt.io/qt-5/embedded-linux.html#linuxfb
+        - fbdev is a bit long in the tooth
+        - consider dumb buffers for simple renders instead
+    https://doc.qt.io/qt-6.2/qpaintdevice.html (xcb x11)
+    https://doc.qt.io/qt-5/linux.html (linux x11)
+https://doc.qt.io/qt-6/qpa.html

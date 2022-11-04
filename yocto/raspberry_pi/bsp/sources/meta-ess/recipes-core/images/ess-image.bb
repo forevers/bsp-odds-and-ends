@@ -3,7 +3,34 @@
 #   is that 'require' will throw an error when it doesn't find that file.
 require recipes-core/images/core-image-base.bb
 
-#require recipes-core/packagegroups/packagegroup-meta-python.bb
+# add a list of packages to extend linux utilities installed
+#   recipe location: poky/meta/recipes-extended/packagegroups
+IMAGE_INSTALL:append = " \
+    packagegroup-core-full-cmdline \
+"
+
+# Target packages for Qt5 SDK
+# IMAGE_INSTALL:append = " packagegroup-qt5-toolchain-target"
+# not required for qt applications, dependencies should be picked up as needed
+IMAGE_INSTALL:append = " packagegroup-qt5-kitchen-sink"
+
+
+# qt demo applications
+IMAGE_INSTALL:append = " \
+    cinematicexperience \
+    qt5-opengles2-test \
+    qt5everywheredemo \
+    qt5ledscreen \
+    qt5nmapcarousedemo \
+    qt5nmapper \
+    qtsmarthome \
+    quitbattery \
+    quitindicators \
+"
+
+# desktop files for qt5 demo
+#   recipe location: meta-qt5/recipes-qt/demo-extrafiles/qt5-demo-extrafiles.bb
+# IMAGE_INSTALL:append = " qt5-demo-extrafiles"
 
 # i2c-tools (https://i2c.wiki.kernel.org/index.php/I2C_Tools)
 # use IMAGE_INSTALL:append instead of +=

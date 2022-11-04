@@ -28,12 +28,6 @@ mkdir -p "${directory}/sources" && cd "${directory}"
 git clone -b kirkstone git://git.yoctoproject.org/poky.git sources/poky
 git clone -b kirkstone git://git.yoctoproject.org/meta-raspberrypi.git sources/meta-raspberrypi
 git clone -b kirkstone https://github.com/openembedded/meta-openembedded.git sources/meta-openembedded
+git clone -b jansa/kirkstone git@github.com:meta-qt5/meta-qt5.git
 
-# original
-# git clone -b kirkstone https://github.com/agherzan/meta-raspberrypi.git sources/meta-raspberrypi
-
-# yoctoproject raspberry rpi repo
-# https://www.interelectronix.com/yocto-build-raspberry-pi-4-docker-environment.html
-# git://git.yoctoproject.org/meta-raspberrypi
-
-echo "Done, type \"cd ${directory} && . ./sources/poky/oe-init-build-env" to create the build environment"
+echo "Done, type \"cd ${directory} && . ./sources/poky/oe-init-build-env\" to create the build environment"

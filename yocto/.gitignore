@@ -1,5 +1,7 @@
-**/build-rpi-ess
 **/tmp
 **/cache
 
+templateconf.cfg
+
 *.o
+**.log
