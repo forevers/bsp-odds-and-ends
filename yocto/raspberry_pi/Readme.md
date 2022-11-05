@@ -67,11 +67,11 @@
 
         - BB_NUMBER_THREADS can be set in local.conf or directly exported in docker shell. Can be up to twice number of cpu cores (should not be set > 20).
             ```console
-            pokyuser:/workdir$ export BB_NUMBER_THREADS=12
+            pokyuser:/workdir$ export BB_NUMBER_THREADS=10
             ```
         - PARALLEL_MAKE -j option for make. Set same as BB_NUMBER_THREADS (should not be set > 20).
             ```console
-            pokyuser:/workdir$ export PARALLEL_MAKE=-j12
+            pokyuser:/workdir$ export PARALLEL_MAKE=-j10
             ```
 
 ## Custom Build Target
@@ -115,7 +115,9 @@
 
     - recipes-apps
         - ess-canonical-app :
-            - demonstrates bb file configuration
+            - makefile based compile
+            - default and optional features
+            - optional feature can be enabled in distro.conf or local.conf
         - flash-ess-application :
             - configures a flask server
 
