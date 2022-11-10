@@ -1,13 +1,13 @@
 # Yocto Builds
 
-## yocto version
+## Yocto Version
 
 - Kirkstone
     - yocto version 4.0.4 (Sept 2022)
     - Long Term Support (minimum Apr. 2024)
     - https://www.yoctoproject.org/software-overview/downloads/
 
-## ess-distro features
+## ess-distro Features
 
 - based off core-image-base.bb
 - overlay-etc: overlayfs applied to rfs /etc
@@ -23,8 +23,9 @@
 - modified /etc/profile defaults for newly created user accounts
 - kernel config modification (defconfig and cfg file based)
 - qt5
+- host qtcreater support
 
-## build environment
+## Build Environment
 
 - clone this repo
     ```console
@@ -49,9 +50,9 @@
             ```
             or
 
-        - script invocation
+        - script invocationpoky-glibc-x86_64-meta-toolchain-qt5-cortexa72-raspberrypi4-64-ess-toolchain-1.0.0.sh
             ```console
-            host:/bsp-odds-and-ends/yocto/raspberry_pi$$ ./run-poky-image.sh
+            host:/bsp-odds-and-ends/yocto/raspberry_pi$ ./run-poky-image.sh
             ```
 
     - pretty old Ubuntu version used by crops/poky container
@@ -74,7 +75,7 @@
             pokyuser:/workdir$ export PARALLEL_MAKE=-j10
             ```
 
-## Custom Build Target
+## Custom Distro
 
 - **ess-distro** distro recipe **ess-image** on machine **raspberrypi4-64-ess**
 
@@ -307,7 +308,7 @@
             export QT_DEBUG_PLUGINS=1
             ```
 
-## bake image
+## Image Bake
 
 - bake an **ess-image image**, takes about 50 minutes on 12 core system
 
@@ -333,7 +334,7 @@
 
 - rootfs location: build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/ess-image/1.0-r0/rootfs
 
-## SD card image flashing
+## SD Card Image Flashing
 
 - resulting images in /workdir/bsp/build$tmp/deploy/images/raspberrypi4-64/. several means available to flash images to SD card: yocto **bmaptool** utility (wic file), rpi-imager 'Raspberry Pi Imager' (wic file), dd (wic file), manual partitioning/formatting/copying.
 
@@ -372,7 +373,97 @@
             $ sudo mkfs.ext4 -L data /dev/sdc3
             ```
 
-## image testing
+## Yocto SDK Creation
+
+- build sdk
+    ```console
+    pokyuser:/workdir/bsp/build-rpi-ess$ bitbake -c populate_sdk ess-image
+    ```
+
+- install sdk
+    ```console
+    host$ ./tmp/deploy/sdk/poky-glibc-x86_64-ess-image-cortexa72-raspberrypi4-64-ess-toolchain-1.0.0.sh
+    ```
+
+- run following to configure sdk environment at a specified location
+    ```console
+    . <path to installed sdk>/environment-setup-cortexa72-poky-linux
+    ```
+
+## qtcreator project
+
+### fixed target IP for deployment
+
+- edit /etc/systemd/network/wlan.network to something like:
+    ```console
+    [Match]
+    Name=eth*
+    KernelCommandLine=!nfsroot
+
+    [Network]
+    DNS=8.8.8.8
+    Address=192.168.1.6
+    Gateway=192.168.1.1
+    ```
+
+- ssh-keygen for public/private key pair to used for deployment
+    ```console
+    host$ ls -1  ~/.ssh/ | grep rpi
+    id_rsa_rpi
+    id_rsa_rpi.pub
+    ```
+
+## meta-toolchain-qt5 SDK Creation
+
+- build sdk
+    ```console
+    pokyuser:/workdir/bsp/build-rpi-ess$ bitbake meta-toolchain-qt5
+    ```
+
+- install sdk
+    ```console
+    host$ ./tmp/deploy/sdk/poky-glibc-x86_64-meta-toolchain-qt5-cortexa72-raspberrypi4-64-ess-toolchain-1.0.0.sh
+    ```
+
+- run following to configure sdk environment at a specified location
+    ```console
+    . <path to installed meta-toolchain-qt5 sdk>/environment-setup-cortexa72-poky-linux
+    ```
+
+## qtcreator Configuration
+
+- identify Qt version running on target
+    ```console
+    root@ess-hostname:~# qmake --version
+    QMake version 3.1
+    Using Qt version 5.15.3 in /usr/lib
+    ```
+
+- configure Qt target device in qtcreator
+
+    ``` console
+    File > New File or Project ...
+
+    Project Name: ess-sdk
+    Build System: qmake
+    Minimal Required Qt Version: 5.15
+
+    Kit Selection > Manage > Add
+        ess-yocto
+        Device TYpe: Generic Linux Device
+        Device > Manage > Add >Devices > Add > Generic Linux Device > Start Wizard
+            ess-rpi / <ip> / root
+            > next
+            select private key file (rsa)
+            > Deploy Public Key
+            > Finish
+
+    ess-rpi device now configured
+    ```
+
+- configure compilers
+
+## Image Testing
 
 - qt5 testing
     ```console
@@ -383,9 +474,8 @@
     root@ess-hostname:~# qmlscene /usr/share/qt5ledscreen-1.0/example_hello.qml -platform eglfs
     root@ess-hostname:~# /usr/share/qt5nmapcarousedemo-1.0/Qt5_NMap_CarouselDemo -platform eglfs
     root@ess-hostname:~# /usr/share/qt5nmapper-1.0/Qt5_NMapper -platform eglfs
-    root@ess-hostname:~# /usr/share/qt5nmapper-1.0/Qt5_NMapper -platform eglfs
-    qmlscene /usr/share/quitbattery-1.0.0/qml/QUItBattery/main.qml -platform eglfs
     root@ess-hostname:~# qmlscene /usr/share/quitindicators-1.0.1/qml/main.qml -platform eglfs
+    root@ess-hostname:~# qmlscene /usr/share/qtsmarthome-1.0.1/qml/main.qml -platform eglfs
     ```
 
 - verify flask server
@@ -690,7 +780,7 @@
     ```
     - to exit qemu console enter Ctrl-A (press and release) followed by x
 
-## other bitbake operations
+## ... Other Bitbake Operations
 
 - list all recipes available
     ```console
@@ -752,7 +842,7 @@ GCCVERSION="11.%"
         pokyuser:/workdir/bsp/build-rpi-ess$ oe-pkgdata-util list-pkg-files <recipe name>
         ```
 
-## boot sequence
+## Boot Sequence
 
 - power on
 - gpu on (cpu remains off)
@@ -769,7 +859,7 @@ GCCVERSION="11.%"
     - load dtb for the rpi4 core (bcm2711-rpi-4-b.dtb) at 0x100
 - init user space process started
 
-## references
+## References
 
 ### yocto references
 #### yocto project

@@ -24,6 +24,8 @@ docker container run \
     --volume "${PWD}/home":/home/yocto \
     --env DL_DIR=/workdir/cache/downloads \
     --env SSTATE_DIR=/workdir/cache/sstate \
+    --env BB_NUMBER_THREADS=10 \
+    --env PARALLEL_MAKE=-j10 \
     crops/poky
 
     # \

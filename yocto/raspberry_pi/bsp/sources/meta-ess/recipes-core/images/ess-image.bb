@@ -14,7 +14,6 @@ IMAGE_INSTALL:append = " \
 # not required for qt applications, dependencies should be picked up as needed
 IMAGE_INSTALL:append = " packagegroup-qt5-kitchen-sink"
 
-
 # qt demo applications
 IMAGE_INSTALL:append = " \
     cinematicexperience \
@@ -26,6 +25,11 @@ IMAGE_INSTALL:append = " \
     qtsmarthome \
     quitbattery \
     quitindicators \
+"
+
+# qt qml, qt quick, ...
+IMAGE_INSTALL:append = " \
+    qtdeclarative \
 "
 
 # desktop files for qt5 demo
@@ -74,3 +78,6 @@ IMAGE_INSTALL:append = " python3-flask"
 
 # flask demo application
 IMAGE_INSTALL:append = " ess-flask-app"
+
+# rsync
+IMAGE_INSTALL:append = " rsync"
