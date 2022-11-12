@@ -19,15 +19,12 @@ docker container run \
     -it \
     --rm \
     -v "${PWD}":/workdir \
+    -v ~:/home/pokyuser \
     --workdir=/workdir \
     --name yocto-ess \
     --volume "${PWD}/home":/home/yocto \
     --env DL_DIR=/workdir/cache/downloads \
     --env SSTATE_DIR=/workdir/cache/sstate \
     --env BB_NUMBER_THREADS=10 \
-    --env PARALLEL_MAKE=-j10 \
+    --env PARALLEL_MAKE="-j 10" \
     crops/poky
-
-    # \
-    # sudo bash -c "groupadd -g 7777 yocto && useradd --password ${empty_password_hash} --shell /bin/bash -u ${UID} -g 7777 \
-    # yocto && usermod -aG sudo yocto && usermod -aG users yocto && cd /opt/yocto && su yocto"

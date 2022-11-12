@@ -1,7 +1,12 @@
 **/tmp
 **/cache
+**/sdk*
+**/bsp/build*
+!raspberry_pi/bsp/build-rpi-ess
 
 templateconf.cfg
 
 *.o
 **.log
+
+**/.vscode

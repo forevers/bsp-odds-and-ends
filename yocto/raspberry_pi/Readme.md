@@ -22,6 +22,8 @@
 - extended root env via systemd script
 - modified /etc/profile defaults for newly created user accounts
 - kernel config modification (defconfig and cfg file based)
+- u-boot config modification (cfg file based)
+- u-boot patching
 - qt5
 - host qtcreater support
 
@@ -50,7 +52,7 @@
             ```
             or
 
-        - script invocationpoky-glibc-x86_64-meta-toolchain-qt5-cortexa72-raspberrypi4-64-ess-toolchain-1.0.0.sh
+        - script invocation
             ```console
             host:/bsp-odds-and-ends/yocto/raspberry_pi$ ./run-poky-image.sh
             ```
@@ -263,6 +265,74 @@
         - copy the kernel config fragment in the bbappend recipe created above renaming to 01_kernel_memory_dbg.cfg
 
         - update linux-raspberrypi_%.bbappend to include 01_kernel_memory_dbg.cfg in SRC_URI. cfg modification are applied after the defconfig has been applied
+
+- u-boot config modification
+
+    - git recipe requires git ssh ... see docker image invocation as one example to provide credentials
+
+    - devtool u-boot source with current patches
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify u-boot
+        ...
+
+    - menuconfig
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/u-boot$ bitbake u-boot -c menuconfig
+        ```
+
+        - select i2c config options
+            ```console
+            config - U-Boot 2022.01 Configuration
+            > Command line interface > Device access commands > i2c
+            ```
+
+    - use the diffconfig utility to create a fragment file showing differences between the old and new kernel configs
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi$ bitbake u-boot -c diffconfig
+        ...
+        Config fragment has been dumped into:
+        /workdir/bsp/build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/u-boot/1_2022.01-r0/fragment.cfg
+        ```
+
+    - use fragment in bbappend, see raspberry_pi/bsp/sources/meta-ess/recipes-bsp/u-boot/u-boot_%.bbappend usage of 01_enable_i2c_cmd.cfg fragment
+
+- u-boot patch creation
+
+    - devtool u-boot source with current patches
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify u-boot
+        ```
+
+    - modify version command processing code cmd/version.c
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/u-boot$ git status
+        On branch devtool
+        Changes not staged for commit:
+        (use "git add <file>..." to update what will be committed)
+        (use "git checkout -- <file>..." to discard changes in working directory)
+
+                modified:   cmd/version.c
+        ```
+
+    - git add and commit cmd/version.c
+        ```console
+        pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/u-boot$ git add cmd/version.c
+        pokyuser:/workdir/bsp/build-rpi-ess/workspace/sources/u-boot$ git commit -m "patch u-boot version command"
+        ```
+
+    - several devtool means to generate layer recipes ... this example manually create diff from commit to apply to exists u-boot bbappend
+        ```console
+        $ git show HEAD > patch0001_modify_version_command.patch
+        ```
+
+    - use this patch in u-boot bbappend
+
+    - verify patch
+        ```console
+        U-Boot> version
+        ...
+        ess patch example
+        ```
 
 - qt5 configurations
 
@@ -554,7 +624,7 @@
     ```console
     $ i2c
     $ ls /dev/i2c*
-    $ i2cdetect
+    $ i2cdetect -l
     ```
 
     - i2c configuration resides in cat /boot/config.txt

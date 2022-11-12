@@ -1,0 +1,13 @@
+diff --git a/cmd/version.c b/cmd/version.c
+index f83f6aff92..2cdc5c002c 100644
+--- a/cmd/version.c
++++ b/cmd/version.c
+@@ -34,6 +34,8 @@ static int do_version(struct cmd_tbl *cmdtp, int flag, int argc,
+ #ifdef CONFIG_SYS_COREBOOT
+ 	printf("coreboot-%s (%s)\n", lib_sysinfo.version, lib_sysinfo.build);
+ #endif
++    printf("ess patch example\n");
++
+ 	return 0;
+ }
+
