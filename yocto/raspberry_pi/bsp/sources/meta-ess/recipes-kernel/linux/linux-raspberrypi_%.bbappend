@@ -3,6 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI += " \
     file://defconfig \
     file://01_kernel_memory_dbg.cfg \
+    file://0001_modify_dts_model_parameter.patch \
     "
 
 # Prevent the use of in-tree defconfig

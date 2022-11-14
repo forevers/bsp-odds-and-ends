@@ -1,0 +1,14 @@
+diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+index 8c0ab39beea1..2df0acf91f14 100644
+--- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
++++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+@@ -6,7 +6,8 @@
+
+ / {
+ 	compatible = "raspberrypi,4-model-b", "brcm,bcm2711";
+-	model = "Raspberry Pi 4 Model B";
++	model = "ess Raspberry Pi 4 Model B";
++	ess_patch = "ess patch";
+
+ 	chosen {
+ 		/* 8250 auxiliary UART instead of pl011 */

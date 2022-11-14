@@ -334,6 +334,62 @@
         ess patch example
         ```
 
+- dts modifications
+
+    - patch existing dts node
+
+        - devtool u-boot source with current patches
+            ```console
+            pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify linux-raspberrypi
+            ```
+
+        - edit model in /linux-raspberrypi/arch/arm/boot/dts/bcm2711-rpi-4-b.dts, git add and commit
+
+    - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/linux-raspberrypi_%.bbappend
+        ```console
+        $ git show HEAD > 0001_modify_dts_model_parameter.patch
+        ```
+
+    - verify dts modification
+
+        - by reversing compiling build dtb
+            ```console
+            /tmp/deploy/images/raspberrypi4-64-ess$ dtc -I dtb -O dts bcm2711-rpi-4-b.dtb -o /tmp/reverse_compiled.dts
+            ```
+
+        - by target image inspection
+            ```console
+            root@ess-hostname:~# cat /proc/device-tree/ess_patch
+            ess patch
+            ```
+
+    - dts files
+        ```console
+        bcm2711-rpi-4-b.dts
+            bcm2711.dtsi
+                bcm283x.dtsi
+                    <dt-bindings/pinctrl/bcm2835.h>
+                    <dt-bindings/clock/bcm2835.h>
+                    <dt-bindings/clock/bcm2835-aux.h>
+                    <dt-bindings/gpio/gpio.h>
+                    <dt-bindings/interrupt-controller/irq.h>
+                    <dt-bindings/soc/bcm2835-pm.h>
+                <dt-bindings/interrupt-controller/arm-gic.h>
+                <dt-bindings/soc/bcm2835-pm.h>
+            bcm2711-rpi.dtsi
+                bcm2835-rpi.dtsi
+                    <dt-bindings/power/raspberrypi-power.h>
+                <dt-bindings/interrupt-controller/arm-gic.h>
+                <dt-bindings/soc/bcm2835-pm.h>
+            bcm270x.dtsi
+                <dt-bindings/power/raspberrypi-power.h>
+            bcm271x-rpi-bt.dtsi
+            bcm2711-rpi-ds.dtsi
+                bcm270x-rpi.dtsi
+            bcm283x-rpi-csi1-2lane.dtsi
+            bcm283x-rpi-i2c0mux_0_44.dtsi
+        ```
+
 - qt5 configurations
 
     - repos<br>
@@ -400,6 +456,7 @@
         ```console
         /tmp/deploy/images/raspberrypi4-64-ess$ dtc -I dtb -O dts bcm2711-rpi-4-b.dtb -o /tmp/reverse_compiled.dts
         ```
+
     -  device tree can be inspected on target under /proc/device-tree
 
 - rootfs location: build-rpi-ess/tmp/work/raspberrypi4_64_ess-poky-linux/ess-image/1.0-r0/rootfs
