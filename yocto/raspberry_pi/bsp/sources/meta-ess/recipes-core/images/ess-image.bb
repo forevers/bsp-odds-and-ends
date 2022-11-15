@@ -81,3 +81,6 @@ IMAGE_INSTALL:append = " ess-flask-app"
 
 # rsync
 IMAGE_INSTALL:append = " rsync"
+
+# multi window shell manager
+IMAGE_INSTALL:append = " tmux"
