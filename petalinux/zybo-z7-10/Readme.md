@@ -4,6 +4,8 @@
 
 - 2022.1
 
+## Distro Features
+
 ## Tools Installation
 
 - Note: tool installation on Ubuntu 22.04 (not formally sported by Xilinx)
@@ -123,11 +125,6 @@
 
         ```console
         host:~/projects/zybo$ petalinux-create -t project -s ~/projects/zybo/bsp/Zybo-Z7-10-Petalinux-2022-1.bsp
-        host:~/projects/zybo$ cd os/
-        host:~/projects/zybo$ time petalinux-build
-        real    59m32.761s
-        user    1m1.301s
-        sys     0m13.097s
         ```
 
 - Builds based off a new hdl design (xsa and bit files)
@@ -135,17 +132,44 @@
     - for modifications to initial fpga design ...
         - ***The petalinux-config --get-hw-description command allows you to initialize or update a PetaLinux project with hardware-specific information from the specified Vivado® Design Suite hardware project. The components affected by this process can include FSBL configuration, U-Boot options, Linux kernel options, and the Linux device tree configuration. This workflow should be used carefully to prevent accidental and/or unintended changes to the hardware configuration for the PetaLinux project. The path used with this workflow is the directory that contains the XSA file rather than the full path to the XSA file itself. This entire option can be omitted if run from the directory that contains the XSA file.***
 
+    - place new xsa file in ../bsp/Zybo-Z7-10-Petalinux-2022-1/os/project-spec/hw-description
+
     - config the project based on (potentially new) xsa
 
         ```console
-        ~/projects/zybo$ petalinux-config --get-hw-description $TOPDIR/bsp/os/project-spec/hw-description/system.xsa
+        ~/projects/zybo/os$ petalinux-config --get-hw-description ../bsp/Zybo-Z7-10-Petalinux-2022-1/os/project-spec/hw-description --silentconfig
         ```
+
+- dts modifications
+
+    - patch existing dts node
+        - TODO
+
+    - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/ ... TODO
+
+    - verify dts modification
+
+        - by reversing compiling build dtb ... TDOD
+
+        - target /proc/device-tree -> /sys/firmware/devicetree/home
+
+        - by target image inspection ... TODO
+            ```console
+            root@ess-hostname:~# cat /proc/device-tree/ ...
+            ess patch
+            ```
+
+- build project
 
     - petalinux-build
 
+        ```console
+        host:~/projects/zybo/os$ petalinux-build
+        ```
+
     - create BOOT.bin
         ```console
-        host:~/projects/zybo$ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
+        host:~/projects/zybo/os$ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
         ```
 
 TODO:
@@ -155,8 +179,6 @@ bootgen
 investigate emmc usage
 investigate persistent rootfs
 investigate overlay over rootfs
-sscache and downloads
-git archive initial project
 
 ## mipi camera notes
 - seems like digilent pcam is mipi camera required ... what about rpi camera ?

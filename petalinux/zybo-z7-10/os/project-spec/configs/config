@@ -255,18 +255,17 @@ CONFIG_DEVTOOL_WORKSPACE_LOCATION="${PROOT}/components/yocto/workspace"
 # Parallel thread execution
 #
 CONFIG_YOCTO_BB_NUMBER_THREADS="10"
-CONFIG_YOCTO_PARALLEL_MAKE="-j 10"
+CONFIG_YOCTO_PARALLEL_MAKE="10"
 
 #
-# Add pre-mirror url
+# Add pre-mirror url 
 #
 CONFIG_PRE_MIRROR_URL="http://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_MAJOR_VER}/downloads"
 
 #
 # Local sstate feeds settings
 #
-#CONFIG_YOCTO_LOCAL_SSTATE_FEEDS_URL=""
-CONFIG_YOCTO_LOCAL_SSTATE_FEEDS_URL="${PETALINUX}/sstate-rel-v2018.3/aarch64"
+CONFIG_YOCTO_LOCAL_SSTATE_FEEDS_URL="${TOPDIR}/../cache/2022.1/sstate/aarch64"
 CONFIG_YOCTO_NETWORK_SSTATE_FEEDS=y
 
 #

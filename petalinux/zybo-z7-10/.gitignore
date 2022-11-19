@@ -1,3 +1,6 @@
+cache/
+!cache/2022.1/downloads/Readme.md
+!cache/2022.1/sstate/Readme.md
 .petalinux
 !.petalinux/metadata
 build/
