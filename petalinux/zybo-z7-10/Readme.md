@@ -180,6 +180,14 @@ investigate emmc usage
 investigate persistent rootfs
 investigate overlay over rootfs
 
+## Power and UART console
+
+- u-USB to PC provides both power and FTDI console on /etc/TTYUSB<x>
+
+    ```console
+    Bus 003 Device 007: ID 0403:6010 Future Technology Devices International, Ltd FT2232C/D/H Dual UART/FIFO IC
+    ```
+
 ## mipi camera notes
 - seems like digilent pcam is mipi camera required ... what about rpi camera ?
     - https://community.element14.com/products/roadtest/rv/roadtest_reviews/653/digilent_zybo_z7_pca_2
@@ -193,8 +201,13 @@ investigate overlay over rootfs
     - https://forum.digilent.com/topic/16385-pcam-5c-demo-on-zybo-z7-10/?sortby=date
     = https://ohwr.org/project/soc-course/wikis/Reverse-Engineering-the-XSA-File
 
+## Image Testing
 
-## Features
+- verify systemd installation
+
+    - [systemd](/docs_shared/systemd.md) usage
+    - [journald](/docs_shared/journald.md) usage
+
 
 ## References
 
