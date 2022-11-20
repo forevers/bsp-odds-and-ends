@@ -1,0 +1,22 @@
+// ess moc configuration
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "digilent,zynq-zyboz7","xlnx,zynq-7000";
+
+    fragment@0 {
+        target = <&soc>;
+        __overlay__ {
+            // a new node name at top level
+            ess-dma-moc {
+                compatible = "ess,ess-dma-moc";
+                buffer_size = <12345>;
+                ess_property_string = "ess property name";
+                ess_property_array = <0x0 0x01 0x02 0x03>;
+                status = "okay";
+            };
+        };
+    };
+
+};

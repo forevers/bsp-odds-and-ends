@@ -273,7 +273,7 @@
     - devtool u-boot source with current patches
         ```console
         pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify u-boot
-        ...
+        ```
 
     - menuconfig
         ```console
@@ -336,6 +336,9 @@
 
 - dts modifications
 
+    - dts overlay
+        - TODO
+
     - patch existing dts node
 
         - devtool u-boot source with current patches
@@ -345,23 +348,23 @@
 
         - edit model in /linux-raspberrypi/arch/arm/boot/dts/bcm2711-rpi-4-b.dts, git add and commit
 
-    - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/linux-raspberrypi_%.bbappend
-        ```console
-        $ git show HEAD > 0001_modify_dts_model_parameter.patch
-        ```
-
-    - verify dts modification
-
-        - by reversing compiling build dtb
+        - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/linux-raspberrypi_%.bbappend
             ```console
-            /tmp/deploy/images/raspberrypi4-64-ess$ dtc -I dtb -O dts bcm2711-rpi-4-b.dtb -o /tmp/reverse_compiled.dts
+            $ git show HEAD > 0001_modify_dts_model_parameter.patch
             ```
 
-        - by target image inspection
-            ```console
-            root@ess-hostname:~# cat /proc/device-tree/ess_patch
-            ess patch
-            ```
+        - verify dts modification
+
+            - by reversing compiling build dtb
+                ```console
+                /tmp/deploy/images/raspberrypi4-64-ess$ dtc -I dtb -O dts bcm2711-rpi-4-b.dtb -o /tmp/reverse_compiled.dts
+                ```
+
+            - by target image inspection
+                ```console
+                root@ess-hostname:~# cat /proc/device-tree/ess_patch
+                ess patch
+                ```
 
     - dts files
         ```console
@@ -454,7 +457,7 @@
     - a composite dts can be created by reverse compiling the dtb built image
 
         ```console
-        /tmp/deploy/images/raspberrypi4-64-ess$ dtc -I dtb -O dts bcm2711-rpi-4-b.dtb -o /tmp/reverse_compiled.dts
+        /tmp/deploy/images/raspberrypi4-64-ess$ dtc -I dtb -O dts bcm2711-rpi-4-b.dtb -o /dev/shm/reverse_compiled.dts
         ```
 
     -  device tree can be inspected on target under /proc/device-tree

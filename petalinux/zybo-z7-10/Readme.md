@@ -1,4 +1,4 @@
-# Petalinux BUilds
+# Petalinux Builds
 
 ## Petalinx Version
 
@@ -88,6 +88,7 @@
             - /os/hardware/system.bit
             - /os/project-spec/hw-description/system.xsa
                 - system.xsa zip file elements:
+                    ```console
                     drivers/axi_i2s_adi_v1_0/data/axi_i2s_adi.mdd
                     drivers/axi_i2s_adi_v1_0/data/axi_i2s_adi.tcl
                     drivers/axi_i2s_adi_v1_0/src/axi_i2s_adi.c
@@ -120,6 +121,7 @@
                     system_wrapper.bit
                     xsa.json
                     xsa.xml
+                    ```
 
     - create project based off released BSP
 
@@ -142,22 +144,60 @@
 
 - dts modifications
 
+    - version
+        ```console
+        host:/bsp-odds-and-ends/petalinux/zybo-z7-10/os$ dtc --version
+        Version: DTC 1.6.1
+        ```
+
+    - overlay
+
+        - target overlay location
+
+            ```console
+            root@Petalinux-2022:~# ls /sys/kernel/config/device-tree/overlays/
+            ```
+
+        - create dts overlay file
+
+        - compile overlay file (-@ to retain symbol info)
+
+            ```console
+            host:/bsp-odds-and-ends/petalinux/zybo-z7-10/os$ dtc -b 0 -@ -O dtb ../dts-overlays/ess-dma-moc-overlay.dts -o /dev/shm/ess-dma-moc-overlay.dtbo
+            ```
+
     - patch existing dts node
         - TODO
 
-    - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/ ... TODO
+        - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/ ... TODO
 
-    - verify dts modification
+        - verify dts modification
 
-        - by reversing compiling build dtb ... TDOD
+            - by reversing compiling build dtb
+                ```console
+                host:/bsp-odds-and-ends/petalinux/zybo-z7-10/os/images/linux$ dtc -I dtb -O dts system.dtb -o /dev/shm/reverse_compiled.dts
+                ```
 
-        - target /proc/device-tree -> /sys/firmware/devicetree/home
+            - target /proc/device-tree -> /sys/firmware/devicetree/home
 
-        - by target image inspection ... TODO
-            ```console
-            root@ess-hostname:~# cat /proc/device-tree/ ...
-            ess patch
-            ```
+            - by target image inspection ... TODO
+                ```console
+                root@ess-hostname:~# cat /proc/device-tree/ ...
+                ess patch
+                ```
+
+    - FPGA Manager (see ug1144)
+
+        - CONFIG_SUBSYSTEM_FPGA_MANAGER enable the fpga manager
+
+        - 'FPGA manager overrides all the options of the device tree overlay. Device Tree Overlay will come into play only when FPGA manager is not selected.'
+
+        - 'The FPGA manager provides an interface to Linux for configuring the programmable logic (PL). It packs the dtbos and bitstreams into the /lib/firmware/xilinx directory in the root file system.'
+
+        - 'Generates the pl.dtsi nodes as a dt overlay (dtbo).'
+
+        - 'fpgautil linux utility to load PL at runtime'
+
 
 - build project
 
@@ -222,6 +262,10 @@ https://www.xilinx.com/support/download.html?_ga=2.170161764.511116902.166845454
 “Vivado ML Edition - <Version #>”
 ### PL tools
 https://docs.xilinx.com/v/u/2020.1-English/ug1144-petalinux-tools-reference-guide
+### xilinx wiki
+https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842482/Device+Tree+Tips
 
-
-
+### device tree
+https://elinux.org/images/f/f9/Petazzoni-device-tree-dummies_0.pdf
+https://elinux.org/Device_Tree_Mysteries
+https://www.kernel.org/doc/Documentation/devicetree/bindings/arm/xilinx.txt
