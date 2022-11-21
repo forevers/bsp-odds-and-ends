@@ -1,3 +1,5 @@
+bsp/
+!bsp/Readme.md
 cache/
 !cache/2022.1/downloads/Readme.md
 !cache/2022.1/sstate/Readme.md
@@ -5,6 +7,9 @@ cache/
 !.petalinux/metadata
 build/
 images/linux
+os/
+!os/configs
+!os/project-spec
 pre-built/linux
 components/plnx-workspace/
 components/yocto/

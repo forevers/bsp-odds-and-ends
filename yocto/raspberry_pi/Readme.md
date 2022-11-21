@@ -637,10 +637,10 @@
         ...
         # Wireless interfaces
         iface wlan0 inet dhcp
-        wireless_mode managed
-        wireless_essid any
-        wpa-driver wext
-        wpa-conf /etc/wpa_supplicant.conf
+            wireless_mode managed
+            wireless_essid any
+            wpa-driver wext
+            wpa-conf /etc/wpa_supplicant.conf
         ```
     - wpa_supplicant.conf file ssid and psk configuration
         ```console
@@ -947,10 +947,10 @@ https://doc.qt.io/qt-6/embedded-linux.html
 #### qt5/6 platform abstraction
 https://doc.qt.io/qt-5/qpa.html
 ##### graphical backend managers
-    https://doc.qt.io/qt-5/embedded-linux.html#embedded-eglfs
-    https://doc.qt.io/qt-5/embedded-linux.html#linuxfb
-        - fbdev is a bit long in the tooth
-        - consider dumb buffers for simple renders instead
-    https://doc.qt.io/qt-6.2/qpaintdevice.html (xcb x11)
-    https://doc.qt.io/qt-5/linux.html (linux x11)
+https://doc.qt.io/qt-5/embedded-linux.html#embedded-eglfs
+https://doc.qt.io/qt-5/embedded-linux.html#linuxfb
+    - fbdev is a bit long in the tooth
+    - consider dumb buffers for simple renders instead
+https://doc.qt.io/qt-6.2/qpaintdevice.html (xcb x11)
+https://doc.qt.io/qt-5/linux.html (linux x11)
 https://doc.qt.io/qt-6/qpa.html

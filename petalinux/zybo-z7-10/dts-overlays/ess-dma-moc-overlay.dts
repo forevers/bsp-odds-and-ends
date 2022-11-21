@@ -6,7 +6,7 @@
     compatible = "digilent,zynq-zyboz7","xlnx,zynq-7000";
 
     fragment@0 {
-        target = <&soc>;
+        target-path = "/";
         __overlay__ {
             // a new node name at top level
             ess-dma-moc {

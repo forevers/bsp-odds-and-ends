@@ -166,6 +166,29 @@
             host:/bsp-odds-and-ends/petalinux/zybo-z7-10/os$ dtc -b 0 -@ -O dtb ../dts-overlays/ess-dma-moc-overlay.dts -o /dev/shm/ess-dma-moc-overlay.dtbo
             ```
 
+        - copy overlay dtbo to target
+            ```console
+            host:$ scp /dev/shm/ess-dma-moc-overlay.dtbo root@<ip>:/dev/shm
+
+        - create overlay subdir on target
+            ```console
+            root@Petalinux-2022:/sys/kernel/config/device-tree/overlays mkdir ess-dma-moc & cd ess-dma-moc
+            ```
+
+        - activate the overlay
+            ```console
+            root@Petalinux-2022:/sys/kernel/config/device-tree/overlays/ess-dma-moc#
+cat /dev/shm/ess-dma-moc-overlay.dtbo >dtbo
+            ```
+
+        - inspect target dts tree
+            ```console
+            root@Petalinux-2022:~# ls /proc/device-tree/ess-dma-moc/
+            buffer_size          compatible           ess_property_array   ess_property_string  name                 status
+            ```
+
+        - modify config CONFIG_SUBSYSTEM_EXTRA_DT_FILES to reference overlay dts source for petalinux-build to compile and place the overlay dtbo in /boot/devicetree
+
     - patch existing dts node
         - TODO
 
@@ -175,7 +198,7 @@
 
             - by reversing compiling build dtb
                 ```console
-                host:/bsp-odds-and-ends/petalinux/zybo-z7-10/os/images/linux$ dtc -I dtb -O dts system.dtb -o /dev/shm/reverse_compiled.dts
+                host:/bsp-odds-and-ends/petalinux/zybo-z7-10/os$ dtc -I dtb -O dts images/linux/system.dtb -o /dev/shm/reverse_compiled.dts
                 ```
 
             - target /proc/device-tree -> /sys/firmware/devicetree/home
