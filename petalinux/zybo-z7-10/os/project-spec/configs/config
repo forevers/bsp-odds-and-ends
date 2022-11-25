@@ -139,7 +139,7 @@ CONFIG_SUBSYSTEM_ENDIAN_LITTLE=y
 # DTG Settings
 #
 CONFIG_SUBSYSTEM_MACHINE_NAME="template"
-CONFIG_SUBSYSTEM_EXTRA_DT_FILES="${TOPDIR}/../dts-overlays/ess-dma-moc-overlay.dts"
+CONFIG_SUBSYSTEM_EXTRA_DT_FILES="${TOPDIR}/../../dts-overlays/ess-dma-moc-overlay.dts"
 
 #
 # Kernel Bootargs
@@ -258,7 +258,7 @@ CONFIG_YOCTO_BB_NUMBER_THREADS="10"
 CONFIG_YOCTO_PARALLEL_MAKE="10"
 
 #
-# Add pre-mirror url
+# Add pre-mirror url 
 #
 CONFIG_PRE_MIRROR_URL="http://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_MAJOR_VER}/downloads"
 
