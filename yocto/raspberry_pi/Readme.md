@@ -171,6 +171,10 @@
     MACHINE = "raspberrypi4-64-ess"
     ```
 
+- overlayfs-etc image feature
+
+    - see 5.82 overlayfs-etc.bbclass : '*In order to have the /etc directory in overlayfs a special handling at early boot stage is required. The idea is to supply a custom init script that mounts /etc before launching the actual init program, because the latter already requires /etc to be mounted.*'
+
 - kernel config method examples
 
     - complete defconfig file replacement
@@ -709,6 +713,7 @@
     - [journald](/docs_shared/journald.md) usage
 
 - verify /etc overlayfs-etc
+
     ```console
     root@ess-hostname:~# ls -l /data/overlay-etc/work/
     d---------    2 root     root          4096 Jan  1  1970 work
@@ -720,7 +725,8 @@
     -rw-r--r--    1 root     root          3687 Apr 28 17:42 ld.so.cache
     -rw-r--r--    1 root     root            33 Apr 28 17:42 machine-id
 
-    root@ess-hostname:~# echo ess-hostname-overlay > /etc/hostname
+    root@ess-hostname:~# echo ess-hostname-overlay  > /data/overlay-etc/upper/hostname
+
     root@ess-hostname:~# cat /etc/hostname
     ess-hostname-overlay
 
@@ -891,6 +897,8 @@ https://docs.yoctoproject.org/dev-manual/start.html
 https://docs.yoctoproject.org/ref-manual/features.html#distro-features
 #### yocto image features
 https://docs.yoctoproject.org/ref-manual/features.html#image-features
+#### yocto overlayfs-etc class
+https://docs.yoctoproject.org/ref-manual/classes.html#overlayfs-etc-bbclass
 #### yocto docker container
 https://github.com/crops/docker-win-mac-docs/wiki
 #### poky crops docker image
@@ -910,6 +918,8 @@ https://kas.readthedocs.io/en/3.1/intro.html
 bsp/sources/poky/documentation/dev-manual/common-tasks.rst
 #### overlayfs-etc IMAGE_FEATURE
 https://docs.kernel.org/filesystems/overlayfs.html
+https://git.yoctoproject.org/poky/plain/meta/classes-recipe/overlayfs.bbclass
+https://git.yoctoproject.org/poky/plain/meta/files/overlayfs-etc-preinit.sh.in
 #### bitbake env symbols
 raspberry_pi/bsp/sources/poky/meta/conf/bitbake.conf
 

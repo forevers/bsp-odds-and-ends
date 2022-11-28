@@ -36,6 +36,12 @@
         ```console
         root@ess-hostname:~# systemctl restart systemd-networkd.service
         ```
+    - restart os
+        ```console
+        root@ess-hostname:~# systemctl start reboot.target
+        ```
+
+- verify systemd networkctl installation
 
     - verify networkctl device listing
         ```console

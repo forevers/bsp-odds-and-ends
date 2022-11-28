@@ -314,6 +314,12 @@
 
     - 'fpgautil linux utility to load PL at runtime'
 
+- overlayfs-etc attempt
+    - place IMAGE_FEATURES:append = " overlayfs-etc" in petalinuxbsp.conf
+        ```console
+        ERROR: Nothing PROVIDES 'petalinux-image-minimal'
+        petalinux-image-minimal was skipped: 'overlayfs-etc' in IMAGE_FEATURES is not a valid image feature. Valid features: allow-empty-password allow-root-login bash-completion-pkgs dbg-pkgs debug-tweaks dev-pkgs doc doc-pkgs eclipse-debug empty-root-password fpga-manager hwcodecs lic-pkgs nfs-client nfs-server package-management petalinux-96boards-sensors petalinux-audio petalinux-base petalinux-benchmarks petalinux-display-debug petalinux-gstreamer petalinux-jupyter petalinux-lmsensors petalinux-matchbox petalinux-mraa petalinux-multimedia petalinux-networking-debug petalinux-networking-stack petalinux-ocicontainers petalinux-openamp petalinux-opencv petalinux-pynq petalinux-pynq-96boardsoverlay petalinux-pynq-bnn petalinux-pynq-helloworld petalinux-python-modules petalinux-qt petalinux-qt-extended petalinux-self-hosted petalinux-som petalinux-tpm petalinux-ultra96-webapp petalinux-utils petalinux-v4lutils petalinux-weston petalinux-x11 petalinux-xen post-install-logging ptest-pkgs qtcreator-debug read-only-rootfs read-only-rootfs-delayed-postinsts splash src-pkgs ssh-server-dropbear ssh-server-openssh stateless-rootfs staticdev-pkgs tools-debug tools-profile tools-sdk tools-testapps weston x11 x11-base x11-sato
+        ```
 
 ## Petalinux Build
 
@@ -334,6 +340,45 @@
 - fdisk FAT32 format SD card boot directory and copy boot.scr, BOOT.bin and image.ub (if not packaged in Boot.bin)
 
 - fdisk other ext4 partitions as needed
+
+    - create ext4 for overlayfs usage
+
+        - fdisk a new partition (/dev/sdc for example)
+
+            ```console
+            host$ sudo fdisk /dev/sdc
+            ...
+            Device      Boot   Start      End  Sectors  Size Id Type
+            /dev/sdc1p1         2048  2099199  2097152    1G  c W95 FAT32 (LBA)
+            /dev/sdc1p2      2099200  4196351  2097152    1G 83 Linux
+            /dev/sdc1p3      4196352  6293503  2097152    1G 83 Linux
+            /dev/sdc1p4      6293504 62355455 56061952 26.7G 83 Linux
+            ```
+
+        - configure ext4 in partition
+            ```console
+            $ sudo mkfs.vfat /dev/sdc1
+            $ sudo mkfs.ext4 -L p2 /dev/sdc2
+            $ sudo mkfs.ext4 -L p3 /dev/sdc3
+            $ sudo mkfs.ext4 -L p4 /dev/sdc4
+            ```
+
+        - reinsert SD card to enumerate filesystems
+            ```console
+            steve@embedify:/mnt/data/projects/clones/bsp-odds-and-ends/petalinux/zybo-z7-10/os$ mount | grep sdc
+            /dev/sdc2 on /media/<USER>/p2 type ext4 (rw,nosuid,nodev,relatime,errors=remount-ro,uhelper=udisks2)
+            /dev/sdc3 on /media/<USER>/p3 type ext4 (rw,nosuid,nodev,relatime,errors=remount-ro,uhelper=udisks2)
+            /dev/sdc4 on /media/<USER>/p4 type ext4 (rw,nosuid,nodev,relatime,errors=remount-ro,uhelper=udisks2)
+            ```
+
+        - on target
+            ```console
+            root@Petalinux-2022:~# mount | grep /run/media/mmcblk0p
+            /dev/mmcblk0p2 on /run/media/mmcblk0p2 type ext4 (rw,relatime)
+            /dev/mmcblk0p1 on /run/media/mmcblk0p1 type vfat (rw,relatime,gid=6,fmask=0007,dmask=0007,allow_utime=0020,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro)
+            /dev/mmcblk0p3 on /run/media/mmcblk0p3 type ext4 (rw,relatime)
+            /dev/mmcblk0p4 on /run/media/mmcblk0p4 type ext4 (rw,relatime)
+            ```
 
 ### QSPI Flash
 
@@ -424,7 +469,6 @@ TODO:
     - https://forum.digilent.com/topic/17944-petalinux-on-zybo-z7-10/
 - ... but wait this thread indicates turning off csi-2 ip debug reduces gate usage ... have to recompile the vivado demo to make it work
     =- https://forum.digilent.com/topic/16834-zybo-z7-20-pcam-demo-unimplementable-on-vivado-20174/
-
 
 - other links
     - https://forum.digilent.com/topic/16385-pcam-5c-demo-on-zybo-z7-10/?sortby=date
