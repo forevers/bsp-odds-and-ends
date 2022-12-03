@@ -1,5 +1,16 @@
 # networking configuration
 
+## network manager services
+
+```console
+root@ess-hostname:~# systemctl --type=service | grep --ignore-case 'network'
+  rdisc.service                        loaded active running Network Router Discovery Daemon
+  systemd-network-generator.service    loaded active exited  Generate network units from Kernel command line
+  systemd-networkd.service             loaded active running Network Configuration
+  systemd-resolved.service             loaded active running Network Name Resolution
+  systemd-timesyncd.service            loaded active running Network Time Synchronization
+```
+
 ## tftp boot
 
 - see https://help.ubuntu.com/community/TFTP for tftp server configuration
@@ -62,7 +73,6 @@
         nfs_server$ ll / | grep export
         drwxrwxrwx   5 root  root ... export/
         nfs_server$ ll /export | grep zybo_z7
-        nfs_server$ ll /export | grep zybo_z7
         drwxrwxrwx  2 nobody nogroup ... zybo_z7/
         ```
 
@@ -99,6 +109,9 @@
     - install rootfs in nfs server exported /export/zybo_z7 directory
 
         ```console
+        mfs_server$ ll /export | grep zybo_z7
+        drwxrwxrwx 18 nobody nogroup 4096 Mar  9  2018 zybo_z7/
+
         nfs_server$ sudo tar --no-overwrite-dir -xzvf <path to rootfs>/rootfs.tar.gz -C /export/zybo_z7
         nfs_server$ ll /export/zybo_z7/
         total 76
