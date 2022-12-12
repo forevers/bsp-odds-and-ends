@@ -84,3 +84,6 @@ IMAGE_INSTALL:append = " rsync"
 
 # multi window shell manager
 IMAGE_INSTALL:append = " tmux"
+
+# tree view
+IMAGE_INSTALL:append = " tree"

@@ -6,7 +6,7 @@
 
 ## Distro Features
 
-    - Ramdisk
+    - initrd rootfs
     - debug uart
     - systemd
     - dts overlay with dma driver example
@@ -76,7 +76,7 @@
 - source PL env settings
 
     ```console
-    host:~/projects/zybo$ source ~/tools/petalinux_2022_1/settings.sh
+    host:~/projects/zybo-z7-10$ source ~/tools/petalinux_2022_1/settings.sh
     ```
 
 - download the '*.bsp' file from the demo release page
@@ -133,7 +133,7 @@
 - create project based off released BSP
 
     ```console
-    host:~/projects/zybo$ petalinux-create -t project -s ~/projects/zybo/bsp/Zybo-Z7-10-Petalinux-2022-1.bsp
+    host:~/projects/zybo-z7-10$ petalinux-create -t project -s ../bsp/Zybo-Z7-10-Petalinux-2022-1.bsp
     ```
 
 ## Builds based off an update hdl design (xsa and bit files)
@@ -158,7 +158,7 @@
     Version: DTC 1.6.1
     ```
 
-- overlay
+- dts overlay
 
     - target overlay location
 
@@ -326,13 +326,21 @@
 - petalinux-build
 
     ```console
-    host:~/projects/zybo/os$ petalinux-build
+    host:~/projects/zybo-z7-10/os$ petalinux-build
     ```
 
 - create BOOT.bin
     ```console
-    host:~/projects/zybo/os$ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
+    host:~/projects/zybo-z7-10/os$ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
     ```
+## Useful Petalinux commands
+
+```console
+petalinux-build -c device-tree
+petalinux-build -c kernel
+petalinux-build -c rootfs
+```
+
 ## Image Flashing
 
 ### SD Card
