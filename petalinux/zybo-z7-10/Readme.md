@@ -1,5 +1,12 @@
 # Petalinux Builds
 
+## device
+
+- zybo-z7
+    - XC7Z010-1CLG400C
+    - pinout
+        - https://www.xilinx.com/content/dam/xilinx/support/packagefiles/z7packages/xc7z010clg400pkg.txt
+
 ## Petalinx Version
 
 - 2022.1
@@ -46,6 +53,19 @@
         - https://github.com/Digilent/vivado-boards/archive/master.zip?_ga=2.26386043.719103120.1668636885-892977042.1667254672
         - vivado-boards-master.zip
             - copy its new/board_files folder to /tools/Xilinx/Vivado/2022.1/data/boards/board_files
+
+    - digilent zybo-z7 project repo at https://github.com/Digilent/Zybo-Z7-HW/tree/10/Petalinux/master
+
+        ```console
+        $ git clone -b 10/Petalinux/master --recursive git@github.com:Digilent/Zybo-Z7-HW.git
+        ```
+    - [reconstructing the project](https://digilent.com/reference/programmable-logic/documents/git?redirect=1)
+        - *The Vivado project must be recreated from its source before use. To create the project, first launch the supported version of Vivado1). Open Vivado's TCL console, and enter the command below. This will recreate and open the Vivado project.*
+            ```console
+            set argv ""; source {local root repo}/hw/scripts/digilent_vivado_checkout.tcl
+            ```
+        - Note: the digilent_vivado_checkout.tcl does not appear to be in the git repo
+
 
     - verify install
         - vivado launch
@@ -150,6 +170,22 @@
     ```
 
 ## dts modifications
+
+- auto-generated dtsi file
+
+```console
+/os$ ls components/plnx_workspace/device-tree/device-tree/
+device-tree.mss           include     ps7_init_gpl.c  ps7_init.tcl      system_wrapper.bit
+drivers                   pcw.dtsi    ps7_init_gpl.h  skeleton.dtsi     zynq-7000.dtsi
+ess-dma-moc-overlay.dts   pl.dtsi     ps7_init.h      system-conf.dtsi
+hardware_description.xsa  ps7_init.c  ps7_init.html   system-top.dts
+```
+    - dts file heirarchy
+        - system_top.dts
+            - zynq-7000.dtsi
+            - pl.dtsi
+            - pcw.dtsi
+            - system-user.dtsi
 
 - version
 
@@ -387,6 +423,17 @@ petalinux-build -c rootfs
             /dev/mmcblk0p3 on /run/media/mmcblk0p3 type ext4 (rw,relatime)
             /dev/mmcblk0p4 on /run/media/mmcblk0p4 type ext4 (rw,relatime)
             ```
+
+- udev rules for emmc partition mounts
+
+    - if paritions not already included in /etc/fstab are detected an attempt to mount them using /etc/udev/scripts/mount.sh:
+        ```console
+        root@Petalinux-2022:~# cat /etc/udev/rules.d/automount.rules
+        ...
+        SUBSYSTEM=="block", ACTION=="add"    RUN+="/etc/udev/scripts/mount.sh"
+        SUBSYSTEM=="block", ACTION=="remove" RUN+="/etc/udev/scripts/mount.sh"
+        SUBSYSTEM=="block", ACTION=="change", ENV{DISK_MEDIA_CHANGE}=="1" RUN+="/etc/udev/scripts/mount.sh"
+        ```
 
 ### QSPI Flash
 

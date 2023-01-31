@@ -26,6 +26,7 @@
 - u-boot patching
 - qt5
 - host qtcreater support
+- bsp version out of tree module and auto load
 
 ## Build Environment
 
@@ -507,6 +508,12 @@
             $ sudo mkfs.ext4 -L data /dev/sdc3
             ```
 
+- manual ext4 rootfs update
+
+    ```console
+    sudo tar --no-overwrite-dir -xzvf ess-image-raspberrypi4-64-ess.tar.bz2 -C <sd card mount path>/root
+    ```
+
 ## Yocto SDK Creation
 
 - build sdk
@@ -843,7 +850,7 @@
 - determine compiler version used by bitbake ... see sources/poky/meta/recipes-devtools/gcc
     ```console
     pokyuser:/workdir/bsp/build-rpi-ess$ bitbake -e | grep "^GCCVERSION="
-GCCVERSION="11.%"
+    GCCVERSION="11.%"
     ```
 - quick return to build directory
     ```console

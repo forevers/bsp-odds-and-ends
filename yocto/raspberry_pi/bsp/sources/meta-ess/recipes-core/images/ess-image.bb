@@ -87,3 +87,6 @@ IMAGE_INSTALL:append = " tmux"
 
 # tree view
 IMAGE_INSTALL:append = " tree"
+
+# bsp version procfs exposure
+IMAGE_INSTALL:append = " bsp-version"
