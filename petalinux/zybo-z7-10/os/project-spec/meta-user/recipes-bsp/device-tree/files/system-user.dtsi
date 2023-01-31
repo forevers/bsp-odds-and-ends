@@ -17,6 +17,118 @@
 		view-port = <0x0170>;
 		drv-vbus;
 	};
+
+    // https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841683/Linux+Reserved+Memory
+	// In UG585, page 112, table 4-1, there is a system level address map.  If you are using
+	//    the US\+ Zynq, then you can find it in UG1085, page 188, table 10-1.
+	// before no-map
+	// root@Petalinux-2022:~# cat /proc/iomem
+	// 00000000-3fffffff : System RAM
+	//   00008000-00afffff : Kernel code
+	//   00c00000-014aef73 : Kernel data
+	// reserved: buffer@0x38000000 is above the current linux claim
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		// reserved for fpga register map
+		reserved_regs: reserved_regs@0 {
+			no-map;
+			// 0x08000000 (134,217,728) bytes of 1G ddr memory for fpga register mapping
+			// placed at top of ddr map
+			// map region 0010_0000 to 3FFF_FFFF - DDR Accessible to all interconnect masters
+			reg = <0x38000000 0x08000000>;
+		};
+
+		// reserved for dma buffer
+		reserved_dma: reserved_dma@0 {
+			no-map;
+			// 0x10000000 (268,435,456) bytes of 1G ddr memory for dma register mapping
+			// placed just before reserved_regs map
+			// map region 0010_0000 to 3FFF_FFFF - DDR Accessible to all interconnect masters
+			reg = <0x28000000 0x10000000>;
+		};
+	};
+
+	// register space
+	uio-reserved-regs@0x38000000 {
+		compatible = "generic-uio";
+		//memory-region = <&reserved_regs>;
+		reg = <0x38000000 0x08000000>;
+        // can i devmem an assigned interrupt ?
+		// intc has num_interrupts = <0x60>; is 96 base 10
+		// irq# 0-15 are sw generated interrupts
+		// pl possible interrupts for 7000 are: 63:61, 68:64, 91:84 (see trm)
+		interrupt-parent = <&intc>;
+		// 1 = L->H edge, 2 = H->L edge, 4 = H level, 8 = L level
+		// interrupts = <0 89 1>;
+		interrupts = <0 0 1>;
+	};
+
+	// dma
+	uio-reserved-dma@0x38000000 {
+		// compatible = "xlnx,reserved-memory";
+		compatible = "generic-uio";
+		//memory-region = <&reserved_dma>;
+		reg = <0x28000000 0x10000000>;
+	};
+
+	// The SGI interrupts are always edge sensitive and are generated when software writes the interrupt
+	// number to ICDSGIR register. All of the targeted CPUs defined in the ICDIPTR [23:8] must handle the
+	// interrupt in order to clear it.
+
+	// // ICDICFR0 0xF8F01C00 - ro, sgi sensitivity
+	// devmem 0xF8F01C00
+
+	// // ICDIPTR0 0xF8F01800 - ro, enable cpu(s) for int ids 0:3, always 01 cpu0
+	// devmem 0xF8F01800
+	// devmem 0xF8F01800 32 0x3
+	// devmem 0xF8F01800
+
+	// // ICDSGIR 0xF8F01F00 - to generate swi
+	// devmem 0xF8F01F00
+    // devmem 0xF8F01F00 32 0x03000000
+	// devmem 0xF8F01F00 32 0x03000001
+    // devmem 0xF8F01F00 32 0x01000000
+	// devmem 0xF8F01F00 32 0x01000001
+
+	// fpga regs
+	// reg space must be 0x10000 minimum
+	fpga_registers: fpga_registers@0x38000000 {
+		compatible ="generic-uio";
+		reg = <0x38000000 0x08000000>;
+        // can i devmem an assigned interrupt ?
+		// intc has num_interrupts = <0x60>; is 96 base 10
+		// irq# 0-15 are sw generated interrupts
+		// pl possible interrupts for 7000 are: 63:61, 68:64, 91:84 (see trm)
+		interrupt-parent = <&intc>;
+		// 1 = L->H edge, 2 = H->L edge, 4 = H level, 8 = L level
+		// interrupts = <0 89 1>;
+		interrupts = <0 0 1>;
+	};
+
+    // btn_4 {
+    //     compatible ="generic-uio";
+    //     interrupt-parent = <&gpio0>;
+    //     // interrupt-parent = <&intc>; // use intc for PL emio interrupt
+    //     // bit fields 0 = L->H edge, 1 = H->L edge, 2 = H level, 3 = L level
+    //     // interrupts = <0 50 1>;
+    //     // mio 50, rising edge
+    //     // interrupts = <50 1>; // did not appear in /proc/interrupt with intc
+
+    //     // test with offset interrupt number mio# + 32, rising edge
+    //     interrupts = <82 1>;
+    // };
+
+    // btn_5 {
+    //     compatible ="generic-uio";
+    //     interrupt-parent = <&gpio0>;
+    //     // bit fields 0 = L->H edge, 1 = H->L edge, 2 = H level, 3 = L level
+    //     // mio 50, rising edge
+    //     interrupts = <51 1>;
+    // };
 };
 
 &gem0 {
@@ -36,7 +148,7 @@
         };
 };
 
-&usb0 {	
+&usb0 {
 	dr_mode = "host";
 	usb-phy = <&usb_phy0>;
 };
@@ -109,15 +221,15 @@
 };
 
 &axi_vdma_0 {
-	compatible = "generic-uio";	
+	compatible = "generic-uio";
 };
 
 &axi_gpio_video {
-	compatible = "generic-uio";	
+	compatible = "generic-uio";
 };
 
 &pwm_rgb {
-	compatible = "generic-uio";	
+	compatible = "generic-uio";
 };
 
 &amba_pl {

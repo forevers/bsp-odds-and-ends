@@ -338,6 +338,17 @@ hardware_description.xsa  ps7_init.c  ps7_init.html   system-top.dts
             ess patch
             ```
 
+- generic uio driver
+
+    - cat /proc/interrupts to see irq registration
+
+    - registered uio class descripes dts node
+        ```console
+        root@Petalinux-2022:~# cat /sys/class/uio/uio6/name
+        reserved-regs-driver
+        ```
+
+
 - FPGA Manager (see ug1144)
 
     - CONFIG_SUBSYSTEM_FPGA_MANAGER enable the fpga manager
@@ -365,9 +376,11 @@ hardware_description.xsa  ps7_init.c  ps7_init.html   system-top.dts
     host:~/projects/zybo-z7-10/os$ petalinux-build
     ```
 
-- create BOOT.bin
+- create BOOT.bi
+n
     ```console
     host:~/projects/zybo-z7-10/os$ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
+
     ```
 ## Useful Petalinux commands
 
@@ -380,6 +393,8 @@ petalinux-build -c rootfs
 ## Image Flashing
 
 ### SD Card
+
+- see /os/images/linux for assets
 
 - fdisk FAT32 format SD card boot directory and copy boot.scr, BOOT.bin and image.ub (if not packaged in Boot.bin)
 
