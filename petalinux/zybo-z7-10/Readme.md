@@ -348,6 +348,11 @@ hardware_description.xsa  ps7_init.c  ps7_init.html   system-top.dts
         reserved-regs-driver
         ```
 
+    - test app
+    ```console
+
+    ```
+
 
 - FPGA Manager (see ug1144)
 
@@ -376,8 +381,7 @@ hardware_description.xsa  ps7_init.c  ps7_init.html   system-top.dts
     host:~/projects/zybo-z7-10/os$ petalinux-build
     ```
 
-- create BOOT.bi
-n
+- create BOOT.bin
     ```console
     host:~/projects/zybo-z7-10/os$ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
 
