@@ -351,7 +351,7 @@
             pokyuser:/workdir/bsp/build-rpi-ess$ devtool modify linux-raspberrypi
             ```
 
-        - edit model in /linux-raspberrypi/arch/arm/boot/dts/bcm2711-rpi-4-b.dts, git add and commit
+        - edit model in /workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi/arch/arm/boot/dts/bcm2711-rpi-4-b.dts, git add and commit
 
         - manually create diff from commit to apply to existing meta-ess/recipes-kernel/linux/linux-raspberrypi_%.bbappend
             ```console
@@ -370,6 +370,23 @@
                 root@ess-hostname:~# cat /proc/device-tree/ess_patch
                 ess patch
                 ```
+
+    - generic uio driver dts patch
+        - baseline defconfig overriden in this project at yocto/raspberry_pi/bsp/sources/meta-ess/recipes-kernel/linux/linux-raspberrypi/defconfig
+            ```console
+            CONFIG_UIO=m
+            CONFIG_UIO_PDRV_GENIRQ=m
+            ```
+
+        - dts patched using devtool
+            - edit model in /workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi/arch/arm/boot/dts/bcm2711-rpi-4-b.dts, git add and commit
+
+        - create patch and copy to
+            ``` console
+            /workdir/bsp/build-rpi-ess/workspace/sources/linux-raspberrypi/arch/arm/boot/dts$ git show HEAD > 0002_add_uio_generic_driver.patch
+            ```
+
+        - copy to and modify linux_raspberrypi recipe meta-ess/recipes-kernel/linux/linux-raspberrypi_%.bbappend
 
     - dts files
         ```console

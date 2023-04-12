@@ -1,0 +1,7 @@
+**/.vscode/
+**/.vscode*
+petalinux/zybo-z7-10/cache
+!/docs_shared
+!petalinux/zybo-z7-10/docs
+!README.md
+backup

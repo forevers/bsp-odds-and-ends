@@ -1,0 +1,21 @@
+if [ -n "$BASH_SOURCE" ]; then
+	export ROOT=$(readlink -f $(dirname "$BASH_SOURCE"))
+elif [ -n "$ZSH_NAME" ]; then
+	export ROOT=$(readlink -f $(dirname "$0"))
+else
+	export ROOT=$(readlink -f ${PWD})
+fi
+
+export TEMPLATECONF=$ROOT/sources/meta-petalinux/conf
+# Use the internal layer, if it's checked out
+if [ -d $ROOT/sources/meta-xilinx-internal ]; then
+    export TEMPLATECONF=$ROOT/sources/meta-xilinx-internal/conf
+fi
+export PATH=$PATH:$ROOT/scripts
+source $ROOT/sources/core/oe-init-build-env "$@"
+
+if [ -n "$PLNX_SETUP" ]; then         
+	$ROOT/sources/petalinux/plnx-setupsdk         
+	export PETALINUX=$ROOT/sources/petalinux         
+	export BB_ENV_EXTRAWHITE="$BB_ENV_EXTRAWHITE PETALINUX" 	
+fi
