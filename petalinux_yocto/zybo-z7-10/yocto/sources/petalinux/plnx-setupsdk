@@ -1,0 +1,13 @@
+rsync -a $ROOT/sources/petalinux/plnxtool.conf conf/
+if [ -d $ROOT/sources/petalinux/machine ]; then
+	rsync -a $ROOT/sources/petalinux/machine conf/
+fi
+
+result=$(grep -x "include conf/plnxtool.conf" "conf/local.conf")
+[ -z "$result" ] && echo "include conf/plnxtool.conf" >> conf/local.conf
+
+result=$(grep -x "include conf/petalinuxbsp.conf" "conf/local.conf")
+[ -z "$result" ] && echo "include conf/petalinuxbsp.conf" >> conf/local.conf
+
+bitbake-layers add-layer $ROOT/sources/petalinux/project-spec/meta-user
+

@@ -1,2 +1,7 @@
 zybo-z7-10/yocto/.repo/
 zybo-z7-10/yocto/build/
+
+zybo-z7-10/yocto/sources/*
+!zybo-z7-10/yocto/sources/petalinux
+
+zybo-z7-10/yocto/sources/petalinux/project-spec/hw-description/*
