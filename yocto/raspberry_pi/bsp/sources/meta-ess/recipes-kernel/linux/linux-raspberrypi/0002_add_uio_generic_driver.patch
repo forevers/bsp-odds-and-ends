@@ -1,0 +1,60 @@
+diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+index 2df0acf91f14..227b83d5e148 100644
+--- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
++++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+@@ -9,11 +9,55 @@
+ 	model = "ess Raspberry Pi 4 Model B";
+ 	ess_patch = "ess patch";
+
++
+ 	chosen {
+ 		/* 8250 auxiliary UART instead of pl011 */
+ 		stdout-path = "serial1:115200n8";
+ 	};
+
++	// before no-map
++	// root@ess-hostname:~# cat /proc/iomem
++	// 00000000-3b3fffff : System RAM
++	//   00000000-00000fff : reserved
++	//   00210000-012fffff : Kernel code
++	//   01300000-016dffff : reserved
++	//   016e0000-01e6ffff : Kernel data
++	//   1ac00000-2ebfffff : reserved
++	//   2eff2000-2f000fff : reserved
++	//   37400000-3b3fffff : reserved
++	// 40000000-7fffffff : System RAM
++	//   7d740000-7f9fffff : reserved
++	//   7fa56000-7fb56fff : reserved
++	//   7fb57000-7fbcafff : reserved
++	//   7fbcd000-7fbcdfff : reserved
++	//   7fbce000-7fbcefff : reserved
++	//   7fbcf000-7fbdffff : reserved
++	//   7fbe0000-7fffffff : reserved
++
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		// reserved for fpga register map
++		reserved_memory_uio: reserved_memory_uio@0 {
++			no-map;
++			// reserve from bottom of ddr @ 000010000 - 000010100
++			reg = <000010000 0x0000100>;
++		};
++	};
++
++	// uio generic driver applied over reserved-memory
++	uio-reserved-memory@000010000 {
++		compatible = "generic-uio";
++		//memory-region = <&reserved_regs>; // if taking up entire range
++		reg = <000010000 0x0000100>;
++        // todo uio interrupt assignement on rpi4
++		// interrupt-parent = <&intc>;
++		// 1 = L->H edge, 2 = H->L edge, 4 = H level, 8 = L level
++		// interrupts = <0 89 1>;
++	};
++
+ 	leds {
+ 		led-act {
+ 			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
