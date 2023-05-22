@@ -1,10 +1,20 @@
 **/tmp
 **/cache
 **/sdk*
-**/bsp/build*
-!raspberry_pi/bsp/build-rpi-ess
 
-templateconf.cfg
+raspberry_pi/bsp/build-rpi-ess/*
+!raspberry_pi/bsp/build-rpi-ess/conf/
+
+raspberry_pi/bsp/sources/meta-ess/recipes-qt/qt5/
+raspberry_pi/bsp/sources/meta-interelectronix-rpi-qt/
+raspberry_pi/bsp/sources/meta-jumpnow/
+raspberry_pi/bsp/sources/meta-openembedded/
+raspberry_pi/bsp/sources/meta-qt5/
+raspberry_pi/bsp/sources/meta-raspberrypi/
+raspberry_pi/bsp/sources/meta-security/
+raspberry_pi/bsp/sources/openembedded-core/
+raspberry_pi/bsp/sources/poky
+raspberry_pi/bsp/sources/rpi64
 
 *.o
 **.log

@@ -4,3 +4,8 @@ petalinux_yocto/zybo-z7-10/yocto/build/tmp/work/zynq_generic-xilinx-linux-gnueab
 
 https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841883/Yocto
 https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/61669922/Customizing+Device+Trees+in+Xilinx+Yocto
+
+
+# documentation
+
+- [**builds**](doc/yocto-build.md) : bitbake targets

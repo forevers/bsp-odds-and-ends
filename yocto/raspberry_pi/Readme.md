@@ -233,6 +233,11 @@
             KCONFIG_MODE = "alldefconfig"
             ```
 
+        - to remove the workspace/sources/recipe
+            ```
+            devtool reset linux-raspberrypi
+            ```
+
     - fragment configuration change
 
         - devtool the kernel recipe

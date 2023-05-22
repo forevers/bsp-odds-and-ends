@@ -26,6 +26,7 @@
 
             ```
             $ sudo mkfs.vfat /dev/sdc1
+            $ sudo fatlabel /dev/sdc1 bootfs
             $ sudo mkfs.ext4 -L p2 /dev/sdc2
             $ sudo mkfs.ext4 -L p3 /dev/sdc3
             $ sudo mkfs.ext4 -L p4 /dev/sdc4
@@ -52,7 +53,7 @@
 
 - udev rules for emmc partition mounts
 
-    - if paritions not already included in /etc/fstab are detected an attempt to mount them using /etc/udev/scripts/mount.sh:
+    - if partitions not already included in /etc/fstab are detected an attempt to mount them using /etc/udev/scripts/mount.sh:
 
         ```
         root@Petalinux-2022:~# cat /etc/udev/rules.d/automount.rules

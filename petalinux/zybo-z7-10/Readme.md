@@ -13,24 +13,24 @@
 
 ## Distro Features
 
-- initrd rootfs: petalinux account, promted for non-persistant password 
+- initrd rootfs: petalinux account, promted for non-persistant password
 - debug uart
 - systemd
 - dts overlay with dma driver example
 
 ## Documentation
 
-- [Xilinx Tools Installation](/docs/xilinx-tools-installation.md)
-- [Petalinux Project Construction/Modification](/docs/petalinux-project-construction.md)
-- [Petalinux -> Yocto Project Migration](/docs/yocto-migration.md)
-- [Petalinux Build](/docs/petalinux-build.md)
-- [Image Flashing](/docs/image-flashing.md)
-- [Device Tree Modifications](/docs/device-tree-modifications.md)
-- [Generic UIO](/docs/generic-uio.md)
-- [FPGA Manager](/docs/fpga-mamager.md)
-- [systemd usage](/docs/shared/systemd.md)
-- [journald usage](/docs/shared/journald.md)
-- [zybo-z7-10 Board Info](/docs/board-info.md)
+- [Xilinx Tools Installation](docs/xilinx-tools-installation.md)
+- [Petalinux Project Construction/Modification](docs/petalinux-project-construction.md)
+- [Petalinux -> Yocto Project Migration](docs/yocto-migration.md)
+- [Petalinux Build](docs/petalinux-build.md)
+- [Image Flashing](docs/image-flashing.md)
+- [Device Tree Modifications](docs/device-tree-modifications.md)
+- [Generic UIO](docs/generic-uio.md)
+- [FPGA Manager](docs/fpga-mamager.md)
+- [systemd usage](docs/shared/systemd.md)
+- [journald usage](docs/shared/journald.md)
+- [zybo-z7-10 Board Info](docs/board-info.md)
 
 ## TODO
 

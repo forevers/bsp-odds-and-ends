@@ -90,3 +90,6 @@ IMAGE_INSTALL:append = " tree"
 
 # bsp version procfs exposure
 IMAGE_INSTALL:append = " bsp-version"
+
+# utility to test uio memory and interrupt interface
+IMAGE_INSTALL:append = " ess-uio-mem-irq-test"
