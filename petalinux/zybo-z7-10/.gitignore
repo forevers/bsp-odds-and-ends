@@ -12,7 +12,10 @@ os/hardware/
 os/images/linux/
 os/pre-built/
 os/project-spec/hw-description/
-os/project-spec/configs/
+!os/project-spec/hw-description/readme.md
+os/project-spec/configs
+!os/project-spec/configs/config
+!os/project-spec/configs/rootfs_config
 scripte/yocto
 */*/config.old
 */*/rootfs_config.old

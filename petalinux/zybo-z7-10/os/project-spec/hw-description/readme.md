@@ -1,0 +1,1 @@
+project-spec/hw-description included to support configuration of a newly cloned git repo using 'os$ petalinux-config --get-hw-description <path to xsa> --silentconfig'
