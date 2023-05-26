@@ -1,0 +1,1 @@
+.petalinux directory must exists to idendify project
