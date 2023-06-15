@@ -32,7 +32,7 @@
     root@ess-hostname:~# systemctl cat systemd-networkd.service
     ```
 
-- edit service config rile
+- edit service config file
     ```console
     root@ess-hostname:~# systemctl edit --full systemd-networkd.service
     ```
@@ -64,9 +64,11 @@
     root@ess-hostname:~# systemctl poweroff
     root@ess-hostname:~# systemctl reboot
     root@ess-host
+
 - list currently running services
     ```console
     root@ess-hostname:~# systemctl --type=service
+    root@ess-hostname:~# pstree
     ```
 
 - list active units

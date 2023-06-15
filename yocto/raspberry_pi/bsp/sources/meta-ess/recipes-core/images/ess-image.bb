@@ -93,3 +93,7 @@ IMAGE_INSTALL:append = " bsp-version"
 
 # utility to test uio memory and interrupt interface
 IMAGE_INSTALL:append = " ess-uio-mem-irq-test"
+
+# networkmanager instead of systemd-networkd
+IMAGE_INSTALL:append = " networkmanager-nmcli"
+IMAGE_INSTALL:append= " iperf3"

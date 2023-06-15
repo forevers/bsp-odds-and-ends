@@ -11,6 +11,59 @@ root@ess-hostname:~# systemctl --type=service | grep --ignore-case 'network'
   systemd-timesyncd.service            loaded active running Network Time Synchronization
 ```
 
+## nmcli utility
+
+- List WAPs
+    ```
+    nmcli -c no dev wifi
+    ```
+
+- Connect to SSID or BSSID
+    ```
+    nmcli -c no dev wifi connect EPT2 password "Password"
+    ```
+
+- Secure Connect to SSID or BSSID
+    ```
+    nmcli -c no dev wifi connect <SSID_or_BSSID> password "Password"
+    ```
+
+- Show password cached for the above secure connection type
+    ```
+    sudo nmcli connection show <SSID> -s | grep psk
+    ```
+
+- Disconnect link
+    ```
+    nmcli device disconnect wlan0
+    ```
+
+- Network Manager cached connection information shared on RW root filesystem.
+    ```
+    sudo cat /etc/NetworkManager/system-connections/
+    ```
+
+- Connect using profile.
+    ```
+    nmcli connection up <profile name>
+    ```
+
+- Delete profile on RW root filesystem.
+    ```
+    nmcli connection delete <profile name>
+    ```
+
+- List network device states.
+    ```
+    nmcli device
+    ```
+
+- Wifi Radio off/on
+    ````
+    nmcli radio wifi off
+    nmcli radio wifi on
+    ````
+
 ## tftp boot
 
 - see https://help.ubuntu.com/community/TFTP for tftp server configuration
